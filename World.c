@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 
 #include "World.h"
 
@@ -109,7 +109,6 @@ World new_World(char const *filepath) {
     }
 
     fclose(f);
-    free(f);
 
     this->wallCt = wallIndex;
     printf("ct: %d\n", this->wallCt);

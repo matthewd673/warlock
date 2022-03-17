@@ -4,6 +4,7 @@
 
 #include "Camera.h"
 #include "Render.h"
+#include "Ray.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -78,7 +79,11 @@ int main(int argc, char *argv[]) {
     SDL_Event e;
 
     Camera cam = new_Camera();
+    Camera_SetHalfRays(cam, 320);
     World world = new_World("input.txt");
+
+    float *distv = (float *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(float));
+    Ray_CastFromCamera(distv, cam, world);
 
     //game loop
     while (!abort) {
@@ -92,15 +97,19 @@ int main(int argc, char *argv[]) {
                         break;
                     case SDLK_w:
                         Camera_Move(cam, 5);
+                        Ray_CastFromCamera(distv, cam, world);
                         break;
                     case SDLK_a:
                         Camera_IncAngle(cam, -0.05);
+                        Ray_CastFromCamera(distv, cam, world);
                         break;
                     case SDLK_s:
                         Camera_Move(cam, -5);
+                        Ray_CastFromCamera(distv, cam, world);
                         break;
                     case SDLK_d:
                         Camera_IncAngle(cam, 0.05);
+                        Ray_CastFromCamera(distv, cam, world);
                         break;
                 }
             }
@@ -112,6 +121,8 @@ int main(int argc, char *argv[]) {
         SDL_FillRect(gCanvas, NULL, 0x000000);
 
         //RENDER
+        DrawPerspective(gCanvas, cam, distv, SCREEN_HEIGHT);
+
         DrawCamera(gCanvas, cam);
         DrawWorld(gCanvas, world);
 
