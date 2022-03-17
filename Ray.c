@@ -51,21 +51,8 @@ int Ray_RRCollision(CollPoint point,
 }
 
 float Ray_DistBetweenPointsSq(float x1, float y1, float x2, float y2) {
-    return pow(x2 - x1, 2) + pow(y2 - y1, 2);
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
-
-//https://www.gamers.org/dEngine/rsc/usenet/comp.graphics.algorithms.faq
-// float Ray_DistToLineSq(float pX, float pY,
-//                      float x1, float y1, float x2, float y2) {
-//     float lenSq = pow(x2-x1, 2) + pow(y2-y1, 2);
-
-//     float r = ((y1-pY)*(y1-y2) - (x1-pX)*(x2-x1)) / lenSq;
-//     float s = ((y1-pY)*(x2-x1) - (x1-pX)*(y2-y1)) / lenSq
-
-//     float iX = x1 + r*(x2-x1);
-//     float iY = y1 + r*(x2-x1);
-
-// }
 
 void Ray_CastFromCamera(float *distv, Camera cam, World world) {
 
@@ -73,11 +60,11 @@ void Ray_CastFromCamera(float *distv, Camera cam, World world) {
         float angle = Camera_GetSightRays(cam)[i];
         float rX1 = Camera_GetX(cam);
         float rY1 = Camera_GetY(cam);
-        float rX2 = rX1 + cos(angle)*Camera_GetSightMag(cam);
-        float rY2 = rY1 + sin(angle)*Camera_GetSightMag(cam);
+        float rX2 = rX1 + cos(angle)*Camera_GetSightMag(cam);//*cos(angle - Camera_GetAngle(cam));
+        float rY2 = rY1 + sin(angle)*Camera_GetSightMag(cam);//*cos(angle - Camera_GetAngle(cam));
         
         CollPoint currentColl = new_CollPoint(0, 0);
-        float nearestDist = -1;
+        float nearestDist = Camera_GetSightMag(cam);
         //TODO: inefficient for large worlds
         for (int j = 0; j < World_GetWallCt(world); j++) {
             Wall w = World_GetWalls(world)[j];
@@ -89,7 +76,7 @@ void Ray_CastFromCamera(float *distv, Camera cam, World world) {
                 continue;
             }
 
-            float dist = Ray_DistBetweenPointsSq(rX1, rY1, c->x, c->y);
+            float dist = Ray_DistBetweenPointsSq(rX1, rY1, c->x, c->y) *cos(angle - Camera_GetAngle(cam));
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;
                 free(currentColl);

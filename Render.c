@@ -38,17 +38,17 @@ void DrawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint8 r, Uin
 
 void DrawCamera(SDL_Surface *surface, Camera cam) {
     //visualize rays
-    for (int i = 0; i < Camera_GetHalfRays(cam) * 2; i++) {
-        float angle = Camera_GetSightRays(cam)[i];
-        DrawLine(
-            surface,
-            Camera_GetX(cam),
-            Camera_GetY(cam),
-            Camera_GetX(cam) + cos(angle)*Camera_GetSightMag(cam)*tan(angle),
-            Camera_GetY(cam) + sin(angle)*Camera_GetSightMag(cam)*tan(angle),
-            100, 100, 100
-        );
-    }
+    // for (int i = 0; i < Camera_GetHalfRays(cam) * 2; i++) {
+    //     float angle = Camera_GetSightRays(cam)[i];
+    //     DrawLine(
+    //         surface,
+    //         Camera_GetX(cam),
+    //         Camera_GetY(cam),
+    //         Camera_GetX(cam) + cos(angle)*Camera_GetSightMag(cam)/cos(angle - Camera_GetAngle(cam)),
+    //         Camera_GetY(cam) + sin(angle)*Camera_GetSightMag(cam)/cos(angle - Camera_GetAngle(cam)),
+    //         100, 100, 100
+    //     );
+    // }
 
     //visualize camera
     DrawLine(
@@ -59,6 +59,24 @@ void DrawCamera(SDL_Surface *surface, Camera cam) {
         Camera_GetY(cam) + Camera_GetSinAngle(cam)*Camera_GetSightMag(cam),
         255, 255, 255
         );
+}
+
+void DrawRays(SDL_Surface *surface, Camera cam, float *distv) {
+    //visualize rays
+    int distc = Camera_GetHalfRays(cam) * 2;
+    for (int i = 0; i < distc; i++) {
+        float angle = Camera_GetSightRays(cam)[i];
+        float len = distv[i];
+
+        DrawLine(
+            surface,
+            Camera_GetX(cam),
+            Camera_GetY(cam),
+            Camera_GetX(cam) + cos(angle)*len,
+            Camera_GetY(cam) + sin(angle)*len,
+            100, 100, 100
+        );
+    }
 }
 
 void DrawWall(SDL_Surface *surface, Wall w) {
@@ -74,13 +92,15 @@ void DrawWorld(SDL_Surface *surface, World w) {
 
 void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, int SCREEN_HEIGHT) {
     int distc = Camera_GetHalfRays(cam) * 2;
-    float maxDist = pow(Camera_GetSightMag(cam), 2);
+    float maxDist = Camera_GetSightMag(cam);
     int halfH = SCREEN_HEIGHT / 2;
     for (int i = 0; i < distc; i++) {
         float dist = distv[i];
-        if (dist <= 0) continue;
+
+        if (dist == Camera_GetSightMag(cam)) continue;
 
         float ratio = 1 - (dist / maxDist);
+
         int drawH = halfH * ratio;
 
         DrawLine(surface,
@@ -88,5 +108,6 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, int SCREEN_
                  i, halfH + drawH,
                  50, 50, 0
                  );
+        if (i < 0) printf("i < 0\n");
     }
 }

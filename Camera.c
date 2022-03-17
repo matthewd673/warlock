@@ -24,7 +24,7 @@ Camera new_Camera(int x, int y) {
     this->x = x;
     this->y = y;
     this->angle = 0;
-    this->sightMag = 200;
+    this->sightMag = 300;
     
     this->cosAngle = 1;
     this->sinAngle = 0;

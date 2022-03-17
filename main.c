@@ -123,6 +123,7 @@ int main(int argc, char *argv[]) {
         //RENDER
         DrawPerspective(gCanvas, cam, distv, SCREEN_HEIGHT);
 
+        DrawRays(gCanvas, cam, distv);
         DrawCamera(gCanvas, cam);
         DrawWorld(gCanvas, world);
 
