@@ -1,10 +1,8 @@
 #include <stdio.h>
+#include <math.h>
 #include <SDL2/SDL.h>
 
-typedef struct Vec2 {
-    int x;
-    int y;
-} *Vec2;
+#include "Camera.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -14,7 +12,7 @@ SDL_Surface *gScreenSurface = NULL;
 
 SDL_Surface *gCanvas = NULL;
 
-int init() {
+int Init() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("Failed to initialize video: %s\n", SDL_GetError());
         return 0;
@@ -38,16 +36,7 @@ int init() {
     return 1;
 }
 
-SDL_Surface *loadSurface(char *path) {
-    SDL_Surface *surface = SDL_LoadBMP(path);
-    if (surface == NULL) {
-        printf("Failed to load image: %s\n", SDL_GetError());
-    }
-
-    return surface;
-}
-
-int createSurface() {
+int CreateSurface() {
     gCanvas = SDL_CreateRGBSurface(
         0,
         SCREEN_WIDTH,
@@ -63,7 +52,7 @@ int createSurface() {
     return 1;
 }
 
-void quit() {
+void Quit() {
     SDL_FreeSurface(gCanvas);
     gCanvas = NULL;
 
@@ -73,36 +62,48 @@ void quit() {
     SDL_Quit();
 }
 
-void setPixel(SDL_Surface *surface, int x, int y, Uint8 r, Uint8 g, Uint8 b) {
+void SetPixel(SDL_Surface *surface, int x, int y, Uint8 r, Uint8 g, Uint8 b) {
+    if (x < 0 || x >= surface->w || y < 0 || y >= surface->h) return;
+
     Uint32 *const target = (Uint32 *) ((Uint8 *) surface->pixels
                                                     + y * surface->pitch
                                                     + x * surface->format->BytesPerPixel);
     *target = SDL_MapRGB(surface->format, r, g, b);
 }
 
-void drawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b) {
-    float slope = (float)(y2 - y1) / (float)(x2 - x1);
+//Bresenham's algorithm
+//https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+void DrawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b) {
+    int dx = abs(x2 - x1);
+    int sx = x1 < x2 ? 1 : -1;
+    int dy = -abs(y2 - y1);
+    int sy = y1 < y2 ? 1 : -1;
+    int error = dx + dy;
 
-    int lastY = y1;
-    for (int i = x1; i < x2; i++) {
-        for (int j = lastY; j < y1 + i*slope; j++) {
-            setPixel(
-                surface,
-                i, j,
-                r, g, b
-            );
+    while (1) {
+        SetPixel(surface, x1, y1, r, g, b);
+        if (x1 == x2 && y1 == y2) break;
+        int twoError = error * 2;
+        if (twoError >= dy) {
+            if (x1 == x2) break;
+            error += dy;
+            x1 += sx;
         }
-        lastY = y1 + i*slope;
+        if (twoError <= dx) {
+            if (y1 == y2) break;
+            error += dx;
+            y1 += sy;
+        }
     }
 }
 
 int main(int argc, char *argv[]) {
-    if (!init()) {
+    if (!Init()) {
         printf("Failed to initialize\n");
         return;
     }
 
-    if (!createSurface()) {
+    if (!CreateSurface()) {
         printf("Failed to load media\n");
         return;
     }
@@ -110,8 +111,7 @@ int main(int argc, char *argv[]) {
     int abort = 0;
     SDL_Event e;
 
-    int x2 = 50;
-    int y2 = 50;
+    Camera cam = new_Camera();
 
     //game loop
     while (!abort) {
@@ -124,32 +124,53 @@ int main(int argc, char *argv[]) {
                         abort = 1;
                         break;
                     case SDLK_w:
-                        y2 -= 2;
+                        Camera_Move(cam, 5);
                         break;
                     case SDLK_a:
-                        x2 -= 2;
+                        Camera_IncAngle(cam, -0.05);
                         break;
                     case SDLK_s:
-                        y2 += 2;
+                        Camera_Move(cam, -5);
                         break;
                     case SDLK_d:
-                        x2 += 2;
+                        Camera_IncAngle(cam, 0.05);
                         break;
                 }
             }
         }
 
-        //begin render
+        //BEGIN RENDER
+        //TODO: this is sloppy, but good enough for now
         SDL_FillRect(gScreenSurface, NULL, 0x000000);
         SDL_FillRect(gCanvas, NULL, 0x000000);
 
-        //render
-        drawLine(gCanvas, 0, 0, x2, y2, 0, 255, 0);
+        //RENDER
+        //visualize rays
+        for (int i = 0; i < Camera_GetHalfRays(cam) * 2; i++) {
+            DrawLine(
+                gCanvas,
+                Camera_GetX(cam),
+                Camera_GetY(cam),
+                Camera_GetX(cam) + cos(Camera_GetSightRays(cam)[i])*Camera_GetSightMag(cam),
+                Camera_GetY(cam) + sin(Camera_GetSightRays(cam)[i])*Camera_GetSightMag(cam),
+                100, 100, 100
+            );
+        }
 
-        //end render
+        //visualize camera
+        DrawLine(
+            gCanvas,
+            Camera_GetX(cam),
+            Camera_GetY(cam),
+            Camera_GetX(cam) + Camera_GetCosAngle(cam)*Camera_GetSightMag(cam),
+            Camera_GetY(cam) + Camera_GetSinAngle(cam)*Camera_GetSightMag(cam),
+            255, 255, 255
+            );
+
+        //END RENDER
         SDL_BlitSurface(gCanvas, NULL, gScreenSurface, NULL);
         SDL_UpdateWindowSurface(gWindow);
     }
 
-    quit();
+    Quit();
 }
