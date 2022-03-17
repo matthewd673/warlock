@@ -1,6 +1,7 @@
 typedef struct Camera *Camera;
 
 Camera new_Camera();
+void Camera_Free(Camera cam);
 
 void Camera_SetPos(Camera cam, int x, int y);
 void Camera_Move(Camera cam, int m);

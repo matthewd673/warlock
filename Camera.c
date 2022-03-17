@@ -37,6 +37,11 @@ Camera new_Camera(int x, int y) {
     return this;
 }
 
+void Camera_Free(Camera cam) {
+    free(cam->rays);
+    free(cam);
+}
+
 void Camera_SetPos(Camera cam, int x, int y) {
     cam->x = x;
     cam->y = y;

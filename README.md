@@ -20,3 +20,9 @@ SDL2.dll
 **Build command:** `gcc main.c -Iinclude -Llib -lmingw32 -lSDL2main -lSDL2 -o program`
 
 **To run:** `./program`
+
+**To debug:**
+
+[Dr. Memory](https://github.com/DynamoRIO/drmemory) is a good alternative to Valgrind for Windows
+
+`drmemory -brief -batch -- program`
