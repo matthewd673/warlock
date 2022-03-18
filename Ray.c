@@ -54,7 +54,7 @@ float Ray_DistBetweenPoints(float x1, float y1, float x2, float y2) {
     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
-void Ray_CastFromCamera(float *distv, Camera cam, World world) {
+void Ray_CastFromCamera(float *distv, Uint32 *colorv, Camera cam, World world) {
 
     for (int i = 0; i < Camera_GetHalfRays(cam) * 2; i++) {
         float angle = Camera_GetSightRays(cam)[i];
@@ -65,6 +65,7 @@ void Ray_CastFromCamera(float *distv, Camera cam, World world) {
         
         CollPoint currentColl = new_CollPoint(0, 0);
         float nearestDist = Camera_GetSightMag(cam);
+        Uint32 nearestColor = 0x00000000;
         //TODO: inefficient for large worlds
         for (int j = 0; j < World_GetWallCt(world); j++) {
             Wall w = World_GetWalls(world)[j];
@@ -80,6 +81,7 @@ void Ray_CastFromCamera(float *distv, Camera cam, World world) {
             
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;
+                nearestColor = Wall_GetColor(w);
                 free(currentColl);
                 currentColl = c;
             }
@@ -89,5 +91,6 @@ void Ray_CastFromCamera(float *distv, Camera cam, World world) {
         }
 
         distv[i] = nearestDist;
+        colorv[i] = nearestColor;
     }
 }

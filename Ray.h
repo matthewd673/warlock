@@ -17,4 +17,4 @@ float Ray_DistBetweeenPoints(float x1, float y1, float x2, float y2);
 // float Ray_DistToLineSq(float pX, float pY,
 //                      float x1, float y1, float x2, float y2);
 
-void Ray_CastFromCamera(float *distv, Camera cam, World w);
+void Ray_CastFromCamera(float *distv, Uint32 *colorv, Camera cam, World w);

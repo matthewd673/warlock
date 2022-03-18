@@ -81,10 +81,11 @@ int main(int argc, char *argv[]) {
     Camera cam = new_Camera();
     Camera_SetHalfRays(cam, 320);
     Camera_SetPos(cam, 0, 270);
-    World world = new_World("input.txt");
+    World world = new_World("input.txt", gCanvas->format);
 
     float *distv = (float *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(float));
-    Ray_CastFromCamera(distv, cam, world);
+    Uint32 *colorv = (Uint32 *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(Uint32));
+    Ray_CastFromCamera(distv, colorv, cam, world);
 
     //game loop
     while (!abort) {
@@ -98,19 +99,19 @@ int main(int argc, char *argv[]) {
                         break;
                     case SDLK_w:
                         Camera_Move(cam, 5);
-                        Ray_CastFromCamera(distv, cam, world);
+                        Ray_CastFromCamera(distv, colorv, cam, world);
                         break;
                     case SDLK_a:
                         Camera_IncAngle(cam, -0.05);
-                        Ray_CastFromCamera(distv, cam, world);
+                        Ray_CastFromCamera(distv, colorv, cam, world);
                         break;
                     case SDLK_s:
                         Camera_Move(cam, -5);
-                        Ray_CastFromCamera(distv, cam, world);
+                        Ray_CastFromCamera(distv, colorv, cam, world);
                         break;
                     case SDLK_d:
                         Camera_IncAngle(cam, 0.05);
-                        Ray_CastFromCamera(distv, cam, world);
+                        Ray_CastFromCamera(distv, colorv, cam, world);
                         break;
                 }
             }
@@ -122,11 +123,11 @@ int main(int argc, char *argv[]) {
         SDL_FillRect(gCanvas, NULL, 0x000000);
 
         //RENDER
-        DrawPerspective(gCanvas, cam, distv, SCREEN_HEIGHT);
+        DrawPerspective(gCanvas, cam, distv, colorv, SCREEN_HEIGHT);
 
-        DrawRays(gCanvas, cam, distv);
-        DrawCamera(gCanvas, cam);
-        DrawWorld(gCanvas, world);
+        // DrawRays(gCanvas, cam, distv);
+        // DrawCamera(gCanvas, cam);
+        // DrawWorld(gCanvas, world);
 
         //END RENDER
         SDL_BlitSurface(gCanvas, NULL, gScreenSurface, NULL);
@@ -134,6 +135,8 @@ int main(int argc, char *argv[]) {
     }
 
     //free
+    free(distv);
+    free(colorv);
     Camera_Free(cam);
     World_Free(world);
 

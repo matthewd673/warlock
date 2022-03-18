@@ -10,12 +10,10 @@ struct Wall {
     int y1;
     int x2;
     int y2;
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
+    Uint32 color;
 };
 
-Wall new_Wall(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b) {
+Wall new_Wall(int x1, int y1, int x2, int y2, Uint32 color) {
     Wall this = (Wall)malloc(sizeof(struct Wall));
     if (this == NULL) return NULL;
 
@@ -24,11 +22,7 @@ Wall new_Wall(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b) {
     this->x2 = x2;
     this->y2 = y2;
 
-    //purple by default, why not
-    this->r = r;
-    this->g = g;
-    this->b = b;
-
+    this->color = color;
     return this;
 }
 
@@ -37,16 +31,14 @@ int Wall_GetY1(Wall w) { return w->y1; }
 int Wall_GetX2(Wall w) { return w->x2; }
 int Wall_GetY2(Wall w) { return w->y2; }
 
-Uint8 Wall_GetR(Wall w) { return w->r; }
-Uint8 Wall_GetG(Wall w) { return w->g; }
-Uint8 Wall_GetB(Wall w) { return w->b; }
+Uint32 Wall_GetColor(Wall w) { return w->color; }
 
 struct World {
     Wall *walls;
     int wallCt;
 };
 
-World new_World(char const *filepath) {
+World new_World(char const *filepath, SDL_PixelFormat *format) {
     World this = (World)malloc(sizeof(struct World));
     if (this == NULL) return NULL;
 
@@ -84,7 +76,6 @@ World new_World(char const *filepath) {
                 }
             }
             else {
-                printf("writing data to %d\n", i - 1);
                 data[i - 1] = atoi(token);
             }
 
@@ -93,8 +84,8 @@ World new_World(char const *filepath) {
         }
 
         if (dataType == 0) { //make a new wall
-            printf("rgb: %d %d %d\n", currentR, currentG, currentB);
-            Wall w = new_Wall(data[0], data[1], data[2], data[3], currentR, currentG, currentB);
+            Wall w = new_Wall(data[0], data[1], data[2], data[3],
+                              SDL_MapRGB(format, currentR, currentG, currentB));
             this->walls[wallIndex] = w;
             wallIndex++;
         }
