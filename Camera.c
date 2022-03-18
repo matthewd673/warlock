@@ -29,7 +29,7 @@ Camera new_Camera(int x, int y) {
     this->cosAngle = 1;
     this->sinAngle = 0;
 
-    this->fov = 3.14 / 2; //90
+    this->fov = 3.14 / 2; //3.14 = 180deg
     this->halfRays = 50;
     this->rays = (float *)calloc(this->halfRays * 2, sizeof(float));
     Camera_CalculateSightRays(this);

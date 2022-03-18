@@ -94,12 +94,12 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, int SCREEN_
     int distc = Camera_GetHalfRays(cam) * 2;
     float maxDist = Camera_GetSightMag(cam);
     int halfH = SCREEN_HEIGHT / 2;
-    for (int i = 0; i < distc; i++) {
+    for (int i = distc - 1; i >= 0; i--) {
         float dist = distv[i];
 
         if (dist == Camera_GetSightMag(cam)) continue;
 
-        float ratio = 1 - (dist / maxDist);
+        float ratio = 1 - dist/maxDist;
 
         int drawH = halfH * ratio;
 
@@ -108,6 +108,5 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, int SCREEN_
                  i, halfH + drawH,
                  50, 50, 0
                  );
-        if (i < 0) printf("i < 0\n");
     }
 }

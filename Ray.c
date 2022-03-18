@@ -50,7 +50,7 @@ int Ray_RRCollision(CollPoint point,
     return 1;
 }
 
-float Ray_DistBetweenPointsSq(float x1, float y1, float x2, float y2) {
+float Ray_DistBetweenPoints(float x1, float y1, float x2, float y2) {
     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
@@ -76,7 +76,8 @@ void Ray_CastFromCamera(float *distv, Camera cam, World world) {
                 continue;
             }
 
-            float dist = Ray_DistBetweenPointsSq(rX1, rY1, c->x, c->y) *cos(angle - Camera_GetAngle(cam));
+            float dist = Ray_DistBetweenPoints(rX1, rY1, c->x, c->y)*cos(Camera_GetAngle(cam)-angle);// * (1-cos(Camera_GetAngle(cam)-angle));
+            
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;
                 free(currentColl);

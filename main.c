@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
 
     Camera cam = new_Camera();
     Camera_SetHalfRays(cam, 320);
+    Camera_SetPos(cam, 0, 270);
     World world = new_World("input.txt");
 
     float *distv = (float *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(float));
