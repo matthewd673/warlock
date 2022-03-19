@@ -54,7 +54,7 @@ float Ray_DistBetweenPoints(float x1, float y1, float x2, float y2) {
     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
-void Ray_CastFromCamera(float *distv, Uint32 *colorv, Camera cam, World world) {
+void Ray_CastFromCamera(float *distv, int *mapv, Camera cam, World world, SDL_PixelFormat *format) {
 
     for (int i = 0; i < Camera_GetHalfRays(cam) * 2; i++) {
         float angle = Camera_GetSightRays(cam)[i];
@@ -65,6 +65,7 @@ void Ray_CastFromCamera(float *distv, Uint32 *colorv, Camera cam, World world) {
         
         CollPoint currentColl = new_CollPoint(0, 0);
         float nearestDist = Camera_GetSightMag(cam);
+        float nearestTexI = 0;
         Uint32 nearestColor = 0x00000000;
         //TODO: inefficient for large worlds
         for (int j = 0; j < World_GetWallCt(world); j++) {
@@ -81,6 +82,7 @@ void Ray_CastFromCamera(float *distv, Uint32 *colorv, Camera cam, World world) {
             
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;
+                nearestTexI = (int)Ray_DistBetweenPoints(c->x, c->y, Wall_GetX1(w), Wall_GetY1(w)) % 64;
                 nearestColor = Wall_GetColor(w);
                 free(currentColl);
                 currentColl = c;
@@ -91,6 +93,7 @@ void Ray_CastFromCamera(float *distv, Uint32 *colorv, Camera cam, World world) {
         }
 
         distv[i] = nearestDist;
-        colorv[i] = nearestColor;
+        // colorv[i] = SDL_MapRGB(format, nearestTexI + 10, 0, nearestTexI + 10);
+        mapv[i] = nearestTexI;
     }
 }

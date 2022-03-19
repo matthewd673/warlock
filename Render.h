@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "World.h"
+#include "Texture.h"
 
 void SetPixel(SDL_Surface *surface, int x, int y, Uint32 color);
 void SetPixelRGB(SDL_Surface *surface, int x, int y, Uint8 r, Uint8 g, Uint8 b);
@@ -11,4 +12,4 @@ void DrawCamera(SDL_Surface *surface, Camera cam);
 void DrawRays(SDL_Surface *surface, Camera cam, float *distv);
 void DrawWall(SDL_Surface *surface, Wall w);
 void DrawWorld(SDL_Surface *surface, World w);
-void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, Uint32 *colorv, int SCREEN_HEIGHT);
+void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, int *mapv, int SCREEN_HEIGHT, Texture texture);

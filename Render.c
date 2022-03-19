@@ -83,11 +83,13 @@ void DrawWorld(SDL_Surface *surface, World w) {
     }
 }
 
-void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, Uint32 *colorv, int SCREEN_HEIGHT) {
+void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, int *mapv, int SCREEN_HEIGHT, Texture texture) {
     int distc = Camera_GetHalfRays(cam) * 2;
     float maxDist = Camera_GetSightMag(cam);
     int halfH = SCREEN_HEIGHT / 2;
-    for (int i = distc - 1; i >= 0; i--) {
+
+    Uint32 *colv = (Uint32 *)malloc(Texture_GetHeight(texture) * sizeof(Uint32));
+    for (int i = distc - 1; i >= 0; i--) { //TODO: i feel like something isn't right here
         float dist = distv[i];
 
         if (dist == Camera_GetSightMag(cam)) continue;
@@ -99,7 +101,24 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, Uint32 *col
         DrawLine(surface,
                  i, halfH - drawH,
                  i, halfH + drawH,
-                 colorv[i]
+                 SDL_MapRGB(surface->format, mapv[i], mapv[i], mapv[i])
                  );
+        
+        Texture_GetColumn(surface, texture, mapv[i], colv);
+        float texHRatio = Texture_GetHeight(texture) / (float)(drawH * 2);
+
+        for (int k = 0; k < drawH * 2; k++) {
+            SetPixel(surface, i, halfH - drawH + k, colv[(int)round(k * texHRatio)]);
+        }
+
     }
+
+    //debug draw
+    for (int i = 0; i < Texture_GetWidth(texture); i++) {
+        Texture_GetColumn(surface, texture, i, colv);
+        for (int j = 0; j < Texture_GetHeight(texture); j++) {
+            SetPixel(surface, i, j, colv[j]);
+        }
+    }
+
 }

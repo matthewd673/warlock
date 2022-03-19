@@ -62,8 +62,6 @@ World new_World(char const *filepath, SDL_PixelFormat *format) {
 
         int i = 0;
         while (token != NULL) {
-            printf("%s\n", token);
-
             if (i == 0) {
                 if (token[0] == '#') break; //comment
                 if (token[0] == 'E') {
@@ -102,7 +100,7 @@ World new_World(char const *filepath, SDL_PixelFormat *format) {
     fclose(f);
 
     this->wallCt = wallIndex;
-    printf("ct: %d\n", this->wallCt);
+    printf("%d wall(s) loaded from '%s'\n", this->wallCt, filepath);
     return this;
 }
 

@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Render.h"
 #include "Ray.h"
+#include "Texture.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -75,6 +76,8 @@ int main(int argc, char *argv[]) {
         return;
     }
 
+    Texture stone = new_Texture("content/stone.png");
+
     int abort = 0;
     SDL_Event e;
 
@@ -84,8 +87,9 @@ int main(int argc, char *argv[]) {
     World world = new_World("input.txt", gCanvas->format);
 
     float *distv = (float *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(float));
-    Uint32 *colorv = (Uint32 *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(Uint32));
-    Ray_CastFromCamera(distv, colorv, cam, world);
+    // Uint32 *colorv = (Uint32 *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(Uint32));
+    int *mapv = (int *)malloc(Camera_GetHalfRays(cam) * 2 * sizeof(int));
+    Ray_CastFromCamera(distv, mapv, cam, world, gCanvas->format);
 
     //game loop
     while (!abort) {
@@ -99,19 +103,19 @@ int main(int argc, char *argv[]) {
                         break;
                     case SDLK_w:
                         Camera_Move(cam, 5);
-                        Ray_CastFromCamera(distv, colorv, cam, world);
+                        Ray_CastFromCamera(distv, mapv, cam, world, gCanvas->format);
                         break;
                     case SDLK_a:
                         Camera_IncAngle(cam, -0.05);
-                        Ray_CastFromCamera(distv, colorv, cam, world);
+                        Ray_CastFromCamera(distv, mapv, cam, world, gCanvas->format);
                         break;
                     case SDLK_s:
                         Camera_Move(cam, -5);
-                        Ray_CastFromCamera(distv, colorv, cam, world);
+                        Ray_CastFromCamera(distv, mapv, cam, world, gCanvas->format);
                         break;
                     case SDLK_d:
                         Camera_IncAngle(cam, 0.05);
-                        Ray_CastFromCamera(distv, colorv, cam, world);
+                        Ray_CastFromCamera(distv, mapv, cam, world, gCanvas->format);
                         break;
                 }
             }
@@ -123,7 +127,7 @@ int main(int argc, char *argv[]) {
         SDL_FillRect(gCanvas, NULL, 0x000000);
 
         //RENDER
-        DrawPerspective(gCanvas, cam, distv, colorv, SCREEN_HEIGHT);
+        DrawPerspective(gCanvas, cam, distv, mapv, SCREEN_HEIGHT, stone);
 
         // DrawRays(gCanvas, cam, distv);
         // DrawCamera(gCanvas, cam);
@@ -136,7 +140,7 @@ int main(int argc, char *argv[]) {
 
     //free
     free(distv);
-    free(colorv);
+    // free(colorv);
     Camera_Free(cam);
     World_Free(world);
 
