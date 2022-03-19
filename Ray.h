@@ -14,7 +14,4 @@ int Ray_RRCollision(CollPoint point,
                     float bX1, float bY1, float bX2, float BY2);
 
 float Ray_DistBetweeenPoints(float x1, float y1, float x2, float y2);
-// float Ray_DistToLineSq(float pX, float pY,
-//                      float x1, float y1, float x2, float y2);
-
-void Ray_CastFromCamera(float *distv, int *mapv, Camera cam, World w, SDL_PixelFormat *format);
+void Ray_CastFromCamera(float *distv, int *mapv, int *texv, Camera cam, World w, SDL_PixelFormat *format);

@@ -1,6 +1,8 @@
 #include "Render.h"
 #include <math.h>
 
+#define TEXTURE_HEIGHT 64
+
 void SetPixel(SDL_Surface *surface, int x, int y, Uint32 color) {
     if (x < 0 || x >= surface->w || y < 0 || y >= surface->h) return;
 
@@ -73,7 +75,8 @@ void DrawRays(SDL_Surface *surface, Camera cam, float *distv) {
 }
 
 void DrawWall(SDL_Surface *surface, Wall w) {
-    DrawLine(surface, Wall_GetX1(w), Wall_GetY1(w), Wall_GetX2(w), Wall_GetY2(w), Wall_GetColor(w));
+    //always draw purple
+    DrawLineRGB(surface, Wall_GetX1(w), Wall_GetY1(w), Wall_GetX2(w), Wall_GetY2(w), 159, 111, 222);
 }
 
 void DrawWorld(SDL_Surface *surface, World w) {
@@ -83,41 +86,23 @@ void DrawWorld(SDL_Surface *surface, World w) {
     }
 }
 
-void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, int *mapv, int SCREEN_HEIGHT, Texture texture) {
+void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv, int *mapv, int *texv, int screenH) {
     int distc = Camera_GetHalfRays(cam) * 2;
     float maxDist = Camera_GetSightMag(cam);
-    int halfH = SCREEN_HEIGHT / 2;
+    int halfH = screenH / 2;
 
-    Uint32 *colv = (Uint32 *)malloc(Texture_GetHeight(texture) * sizeof(Uint32));
+    Uint32 *colv = (Uint32 *)malloc(TEXTURE_HEIGHT * sizeof(Uint32));
     for (int i = distc - 1; i >= 0; i--) { //TODO: i feel like something isn't right here
         float dist = distv[i];
-
         if (dist == Camera_GetSightMag(cam)) continue;
 
         float ratio = 1 - dist/maxDist;
-
         int drawH = halfH * ratio;
 
-        DrawLine(surface,
-                 i, halfH - drawH,
-                 i, halfH + drawH,
-                 SDL_MapRGB(surface->format, mapv[i], mapv[i], mapv[i])
-                 );
-        
-        Texture_GetColumn(surface, texture, mapv[i], colv);
-        float texHRatio = Texture_GetHeight(texture) / (float)(drawH * 2);
-
+        Texture_GetColumn(surface, World_GetTextures(world)[texv[i]], mapv[i], colv);
+        float texHRatio = TEXTURE_HEIGHT / (float)(drawH * 2);
         for (int k = 0; k < drawH * 2; k++) {
             SetPixel(surface, i, halfH - drawH + k, colv[(int)round(k * texHRatio)]);
-        }
-
-    }
-
-    //debug draw
-    for (int i = 0; i < Texture_GetWidth(texture); i++) {
-        Texture_GetColumn(surface, texture, i, colv);
-        for (int j = 0; j < Texture_GetHeight(texture); j++) {
-            SetPixel(surface, i, j, colv[j]);
         }
     }
 

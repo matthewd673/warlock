@@ -15,3 +15,5 @@ unsigned char *Texture_GetRawImg(Texture texture);
 
 void Texture_DrawImage(SDL_Surface *surface, Texture texture);
 void Texture_GetColumn(SDL_Surface *surface, Texture texture, int colI, Uint32 *colv);
+
+Texture *new_TextureArray(int ct);

@@ -1,19 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-// #include <SDL2/SDL.h>
 
 #include "World.h"
+#include "Texture.h"
 
 struct Wall {
     int x1;
     int y1;
     int x2;
     int y2;
-    Uint32 color;
+    int textureId;
 };
 
-Wall new_Wall(int x1, int y1, int x2, int y2, Uint32 color) {
+Wall new_Wall(int x1, int y1, int x2, int y2, int textureId) {
     Wall this = (Wall)malloc(sizeof(struct Wall));
     if (this == NULL) return NULL;
 
@@ -22,7 +22,7 @@ Wall new_Wall(int x1, int y1, int x2, int y2, Uint32 color) {
     this->x2 = x2;
     this->y2 = y2;
 
-    this->color = color;
+    this->textureId = textureId;
     return this;
 }
 
@@ -31,70 +31,61 @@ int Wall_GetY1(Wall w) { return w->y1; }
 int Wall_GetX2(Wall w) { return w->x2; }
 int Wall_GetY2(Wall w) { return w->y2; }
 
-Uint32 Wall_GetColor(Wall w) { return w->color; }
+int Wall_GetTextureId(Wall w) { return w->textureId; }
 
 struct World {
-    Wall *walls;
     int wallCt;
+    int textureCt;
+    Wall *walls;
+    Texture *textures;
 };
 
 World new_World(char const *filepath, SDL_PixelFormat *format) {
     World this = (World)malloc(sizeof(struct World));
     if (this == NULL) return NULL;
 
-    this->walls = (Wall *)malloc(512 * sizeof(struct Wall));
+    this->walls = (Wall *)malloc(512 * sizeof(struct Wall)); //hardcoded cap of 512 walls
     int wallIndex = 0;
 
     FILE *f;
     char buffer[4096];
     f = fopen(filepath, "r");
 
-    Uint8 currentR = 255;
-    Uint8 currentG = 255;
-    Uint8 currentB = 255;
+    int textureLoadI = 0;
+    int currentTexture = 1;
 
     fgets(buffer, 4096, f);
-    while (fgets(buffer, 4096, f) != NULL) {
+    while (fgets(buffer, 4096, f) != NULL) {        
         char *token = strtok(buffer, " ");
         
-        int *data;
-        int dataType = -1;
-
-        int i = 0;
-        while (token != NULL) {
-            if (i == 0) {
-                if (token[0] == '#') break; //comment
-                if (token[0] == 'E') {
-                    dataType = 0;
-                    data = (int *)calloc(4, sizeof(int));
-                }
-                if (token[0] == 'C') {
-                    dataType = 1;
-                    data = (int *)calloc(3, sizeof(int));
-                }
-            }
-            else {
-                data[i - 1] = atoi(token);
-            }
-
-            token = strtok(NULL, " ");
-            i++;
-        }
-
-        if (dataType == 0) { //make a new wall
-            Wall w = new_Wall(data[0], data[1], data[2], data[3],
-                              SDL_MapRGB(format, currentR, currentG, currentB));
+        if (token[0] == '#') continue;
+        else if (token[0] == 'E') { //new edge
+            //expects 4 int tokens
+            Wall w = new_Wall(
+                atoi(strtok(NULL, " ")),
+                atoi(strtok(NULL, " ")),
+                atoi(strtok(NULL, " ")),
+                atoi(strtok(NULL, " ")),
+                currentTexture
+            );
             this->walls[wallIndex] = w;
             wallIndex++;
         }
-        else if (dataType == 1) { //update color info
-            currentR = (Uint8)data[0];
-            currentG = (Uint8)data[1];
-            currentB = (Uint8)data[2];
+        else if (token[0] == 'L') { //load texture
+            //expects 1 string token
+            this->textures[textureLoadI] = new_Texture(
+                strtok(NULL, "\n")
+            );
+            textureLoadI++;
         }
-
-        free(data);
-
+        else if (token[0] == 'A') { //allocate texture array
+            //expects 1 int token
+            this->textureCt = atoi(strtok(NULL, " "));
+            this->textures = new_TextureArray(this->textureCt);
+        }
+        else if (token[0] == 'T') { //set current texture i
+            currentTexture = atoi(strtok(NULL, " ")) - 1; //1-indexed
+        }
     }
 
     fclose(f);
@@ -104,10 +95,6 @@ World new_World(char const *filepath, SDL_PixelFormat *format) {
     return this;
 }
 
-Wall *World_GetWalls(World w) { return w->walls; }
-
-int World_GetWallCt(World w) { return w->wallCt; }
-
 void World_Free(World w) {
     // free(w->walls);
     for (int i = 0; i < w->wallCt; i++) {
@@ -116,3 +103,9 @@ void World_Free(World w) {
     free(w->walls);
     free(w);
 }
+
+Wall *World_GetWalls(World w) { return w->walls; }
+int World_GetWallCt(World w) { return w->wallCt; }
+
+Texture *World_GetTextures(World w) { return w->textures; }
+int World_GetTextureCt(World w) { return w->textureCt; }

@@ -12,4 +12,4 @@ void DrawCamera(SDL_Surface *surface, Camera cam);
 void DrawRays(SDL_Surface *surface, Camera cam, float *distv);
 void DrawWall(SDL_Surface *surface, Wall w);
 void DrawWorld(SDL_Surface *surface, World w);
-void DrawPerspective(SDL_Surface *surface, Camera cam, float *distv, int *mapv, int SCREEN_HEIGHT, Texture texture);
+void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv, int *mapv, int *texv, int screenH);

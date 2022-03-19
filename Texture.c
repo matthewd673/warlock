@@ -68,3 +68,10 @@ void Texture_GetColumn(SDL_Surface *surface, Texture texture, int colI, Uint32 *
         i++;
     }
 }
+
+Texture *new_TextureArray(int ct) {
+    Texture *this = (Texture *)malloc(ct * sizeof(Texture));
+    if (this == NULL) return NULL;
+
+    return this;
+}

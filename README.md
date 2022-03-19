@@ -32,10 +32,13 @@ SDL2.dll
 
 ## World Files
 
-World files are very rudimentary. They consist of two types of commands, with one command per line. If the renderer ever becomes more fancy, so too will the world files.
+World files are very rudimentary, they consist of one-letter commands followd by arguments.
 
-- **Edges:** `E [x1] [y1] [x2] [y2]`
-- **Colors**: `C [r] [g] [b]`
+- **Load textures:**
+  - **Allocate the correct # of texture slots:** `A [ct]`
+  - **Load a texture:** `L [filepath]`
+- **Set the current texture:** `T 1` (1-indexed, same order they were loaded in)
+- **Define a new edge:** `E [x1] [y1] [x2] [y2]`
 - Any line starting with `#` is ignored
 
-Each edge (wall) will be colored according to the last color command *(default: white)*.
+Each edge (wall) will be textured according to the last texture command *(default: 1)*.
