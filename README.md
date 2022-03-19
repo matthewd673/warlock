@@ -16,19 +16,21 @@ include/
         (contents of SDL2 include dir)
 lib/
     (contents of SDL2 lib dir)
+content/
+    (included in repo)
 main.c
 SDL2.dll
 ```
 
-**Build command:** `gcc main.c -Iinclude -Llib -lmingw32 -lSDL2main -lSDL2 -o program`
+**Build command:** `gcc main.c -Iinclude -Llib -lmingw32 -lSDL2main -lSDL2 -o sdlray`
 
-**To run:** `./program`
+**To run:** `./sdlray`
 
 **To debug:**
 
 [Dr. Memory](https://github.com/DynamoRIO/drmemory) is a good alternative to Valgrind for Windows
 
-`drmemory -brief -batch -- program`
+`drmemory -brief -batch -- sdlray`
 
 ## World Files
 

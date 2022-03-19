@@ -2,6 +2,7 @@
 #include <math.h>
 
 #define TEXTURE_HEIGHT 64
+#define WALL_HEIGHT 10
 
 void SetPixel(SDL_Surface *surface, int x, int y, Uint32 color) {
     if (x < 0 || x >= surface->w || y < 0 || y >= surface->h) return;
@@ -51,8 +52,8 @@ void DrawCamera(SDL_Surface *surface, Camera cam) {
         surface,
         Camera_GetX(cam),
         Camera_GetY(cam),
-        Camera_GetX(cam) + Camera_GetCosAngle(cam)*Camera_GetSightMag(cam),
-        Camera_GetY(cam) + Camera_GetSinAngle(cam)*Camera_GetSightMag(cam),
+        Camera_GetX(cam) + Camera_GetCosAngle(cam)*Camera_GetProjDist(cam),
+        Camera_GetY(cam) + Camera_GetSinAngle(cam)*Camera_GetProjDist(cam),
         255, 255, 255
         );
 }
@@ -60,7 +61,7 @@ void DrawCamera(SDL_Surface *surface, Camera cam) {
 void DrawRays(SDL_Surface *surface, Camera cam, float *distv) {
     int distc = Camera_GetHalfRays(cam) * 2;
     for (int i = 0; i < distc; i++) {
-        float angle = Camera_GetSightRays(cam)[i];
+        float angle = Camera_GetRayAngles(cam)[i];
         float len = distv[i];
 
         DrawLineRGB(
@@ -88,21 +89,27 @@ void DrawWorld(SDL_Surface *surface, World w) {
 
 void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv, int *mapv, int *texv, int screenH) {
     int distc = Camera_GetHalfRays(cam) * 2;
-    float maxDist = Camera_GetSightMag(cam);
+    float maxDist = Camera_GetProjDist(cam);
     int halfH = screenH / 2;
 
     Uint32 *colv = (Uint32 *)malloc(TEXTURE_HEIGHT * sizeof(Uint32));
     for (int i = distc - 1; i >= 0; i--) { //TODO: i feel like something isn't right here
         float dist = distv[i];
-        if (dist == Camera_GetSightMag(cam)) continue;
+        if (dist == maxDist) continue;
 
-        float ratio = 1 - dist/maxDist;
-        int drawH = halfH * ratio;
+        //https://stackoverflow.com/a/66664319/3785038
+        float wallH = (screenH / dist);
+        wallH *= WALL_HEIGHT;
+        if (wallH > screenH) wallH = screenH;
 
         Texture_GetColumn(surface, World_GetTextures(world)[texv[i]], mapv[i], colv);
-        float texHRatio = TEXTURE_HEIGHT / (float)(drawH * 2);
-        for (int k = 0; k < drawH * 2; k++) {
-            SetPixel(surface, i, halfH - drawH + k, colv[(int)round(k * texHRatio)]);
+        float texHRatio = TEXTURE_HEIGHT / (wallH * 2);
+        for (int k = 0; k < round(wallH * 2.0); k++) {
+            SetPixel(surface,
+                    i,
+                    round(halfH - wallH) + k,
+                    colv[(int)round(k * texHRatio)]
+                    );
         }
     }
 

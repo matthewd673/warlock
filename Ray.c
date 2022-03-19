@@ -55,16 +55,22 @@ float Ray_DistBetweenPoints(float x1, float y1, float x2, float y2) {
 }
 
 void Ray_CastFromCamera(float *distv, int *mapv, int *texv, Camera cam, World world, SDL_PixelFormat *format) {
-
-    for (int i = 0; i < Camera_GetHalfRays(cam) * 2; i++) {
-        float angle = Camera_GetSightRays(cam)[i];
+    int halfRays = Camera_GetHalfRays(cam);
+    for (int i = 0; i < halfRays * 2; i++) {
+        float angle = Camera_GetRayAngles(cam)[i];
         float rX1 = Camera_GetX(cam);
         float rY1 = Camera_GetY(cam);
-        float rX2 = rX1 + cos(angle)*Camera_GetSightMag(cam);//*cos(angle - Camera_GetAngle(cam));
-        float rY2 = rY1 + sin(angle)*Camera_GetSightMag(cam);//*cos(angle - Camera_GetAngle(cam));
+
+        // float screenHalfLen = Camera_GetProjDist(cam) * tan(Camera_GetFOV(cam)/2.0);
+        // float rayLen = screenHalfLen / halfRays;
+
+        // float angle = atan((rayLen*i - screenHalfLen) / Camera_GetProjDist(cam));
+
+        float rX2 = rX1 + cos(angle)*Camera_GetProjDist(cam);//*cos(angle - Camera_GetAngle(cam));
+        float rY2 = rY1 + sin(angle)*Camera_GetProjDist(cam);//*cos(angle - Camera_GetAngle(cam));
         
         CollPoint currentColl = new_CollPoint(0, 0);
-        float nearestDist = Camera_GetSightMag(cam);
+        float nearestDist = Camera_GetProjDist(cam);
         int nearestMap = 0;
         int nearestTex = 0;
         //TODO: inefficient for large worlds
@@ -80,7 +86,8 @@ void Ray_CastFromCamera(float *distv, int *mapv, int *texv, Camera cam, World wo
                 continue;
             }
 
-            float dist = Ray_DistBetweenPoints(rX1, rY1, c->x, c->y)*cos(Camera_GetAngle(cam)-angle);// * (1-cos(Camera_GetAngle(cam)-angle));
+            float dist = Ray_DistBetweenPoints(rX1, rY1, c->x, c->y);
+            dist *= cos(angle - Camera_GetAngle(cam)); //correct for fisheye
             
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;

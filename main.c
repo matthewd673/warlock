@@ -10,6 +10,9 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
+#define CAM_SPEED 2
+#define CAM_TURNING_SPEED 0.1
+
 SDL_Window *gWindow = NULL;
 SDL_Surface *gScreenSurface = NULL;
 
@@ -81,9 +84,10 @@ int main(int argc, char *argv[]) {
     int abort = 0;
     SDL_Event e;
 
-    Camera cam = new_Camera();
-    Camera_SetHalfRays(cam, 320);
-    Camera_SetPos(cam, 0, 270);
+    Camera cam = new_Camera(0, 0);
+    Camera_SetHalfRays(cam, 340);
+    Camera_SetFOV(cam, (100/360.0) * 2*3.14);
+    Camera_SetProjDist(cam, SCREEN_HEIGHT);
     World world = new_World("input.txt", gCanvas->format);
 
     float *distv = (float *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(float));
@@ -102,19 +106,19 @@ int main(int argc, char *argv[]) {
                         abort = 1;
                         break;
                     case SDLK_w:
-                        Camera_Move(cam, 5);
+                        Camera_Move(cam, CAM_SPEED);
                         Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
                         break;
                     case SDLK_a:
-                        Camera_IncAngle(cam, -0.05);
+                        Camera_IncAngle(cam, -CAM_TURNING_SPEED);
                         Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
                         break;
                     case SDLK_s:
-                        Camera_Move(cam, -5);
+                        Camera_Move(cam, -CAM_SPEED);
                         Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
                         break;
                     case SDLK_d:
-                        Camera_IncAngle(cam, 0.05);
+                        Camera_IncAngle(cam, CAM_TURNING_SPEED);
                         Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
                         break;
                 }
