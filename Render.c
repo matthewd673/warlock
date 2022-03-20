@@ -2,6 +2,8 @@
 #include <math.h>
 
 #define TEXTURE_HEIGHT 64
+#define TEXTURE_WIDTH 64
+#define TEXTURE_HOR_SCALE 1
 #define WALL_HEIGHT 10
 
 void SetPixel(SDL_Surface *surface, int x, int y, Uint32 color) {
@@ -102,13 +104,18 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv
         wallH *= WALL_HEIGHT;
         if (wallH > screenH) wallH = screenH;
 
-        Texture_GetColumn(surface, World_GetTextures(world)[texv[i]], mapv[i], colv);
+        float lightRatio = 1 - (dist / maxDist);
+
+        Texture_GetColumn(surface, World_GetTextures(world)[texv[i]], (int)round(mapv[i] * TEXTURE_HOR_SCALE) % TEXTURE_WIDTH, colv);
         float texHRatio = TEXTURE_HEIGHT / (wallH * 2);
         for (int k = 0; k < round(wallH * 2.0); k++) {
-            SetPixel(surface,
+            Uint32 color = colv[(int)round(k * texHRatio)];
+            SetPixelRGB(surface,
                     i,
                     round(halfH - wallH) + k,
-                    colv[(int)round(k * texHRatio)]
+                    ((color >> 24) & 0x000000ff) * lightRatio,
+                    ((color >> 16) & 0x000000ff) * lightRatio,
+                    ((color >> 8) & 0x000000ff) * lightRatio
                     );
         }
     }

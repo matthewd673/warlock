@@ -10,6 +10,7 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
+#define FOV 90
 #define CAM_SPEED 2
 #define CAM_TURNING_SPEED 0.1
 
@@ -85,8 +86,8 @@ int main(int argc, char *argv[]) {
     SDL_Event e;
 
     Camera cam = new_Camera(0, 0);
-    Camera_SetHalfRays(cam, 340);
-    Camera_SetFOV(cam, (100/360.0) * 2*3.14);
+    Camera_SetHalfRays(cam, SCREEN_WIDTH / 2);
+    Camera_SetFOV(cam, (FOV/360.0) * 2*3.14);
     Camera_SetProjDist(cam, SCREEN_HEIGHT);
     World world = new_World("input.txt", gCanvas->format);
 

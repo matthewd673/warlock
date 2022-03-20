@@ -1,8 +1,9 @@
 # allocate 1 texture
-A 2
+A 3
 # define all textures
 L content/stone.png
 L content/processor.png
+L content/debug.png
 
 # stone box
 T 1
@@ -10,5 +11,5 @@ E 100 150 100 400
 E 100 400 500 400
 T 2
 E 50 400 50 100
-T 1
+T 3
 E 100 150 500 100

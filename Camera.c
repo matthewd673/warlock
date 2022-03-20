@@ -85,14 +85,8 @@ void Camera_SetHalfRays(Camera cam, int halfRays) {
 int Camera_GetHalfRays(Camera cam) { return cam->halfRays; }
 
 void Camera_CalculateRayAngles(Camera cam) {
-    // float increment = cam->fov / (cam->halfRays * 2);
-
-    // for (int i = -cam->halfRays; i < cam->halfRays; i++) {
-    //     cam->rays[i + cam->halfRays] = cam->angle + increment*i;
-    // }
-
     //https://stackoverflow.com/a/55247059/3785038
-    float screenHalfLen = cam->projDist * tan(cam->fov/2.0);
+    float screenHalfLen = cam->projDist * tan(cam->fov/2.0); //perhaps SCREEN_WIDTH * tan(...)?
     float rayLen = screenHalfLen / cam->halfRays;
     for (int i = 0; i < cam->halfRays * 2; i++) {
         cam->rays[i] = atan(((rayLen*i) - screenHalfLen) / cam->projDist) + cam->angle;

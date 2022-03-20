@@ -91,7 +91,7 @@ void Ray_CastFromCamera(float *distv, int *mapv, int *texv, Camera cam, World wo
             
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;
-                nearestMap = (int)Ray_DistBetweenPoints(c->x, c->y, Wall_GetX1(w), Wall_GetY1(w)) % 64;
+                nearestMap = round(Ray_DistBetweenPoints(c->x, c->y, Wall_GetX1(w), Wall_GetY1(w)));
                 nearestTex = Wall_GetTextureId(w);
                 free(currentColl);
                 currentColl = c;
