@@ -22,7 +22,7 @@ main.c
 SDL2.dll
 ```
 
-**Build command:** `gcc main.c -Iinclude -Llib -lmingw32 -lSDL2main -lSDL2 -o sdlray`
+**Build command:** `gcc *.c -Iinclude -Llib -lmingw32 -lSDL2main -lSDL2 -o sdlray`
 
 **To run:** `./sdlray`
 

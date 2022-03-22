@@ -134,9 +134,9 @@ int main(int argc, char *argv[]) {
         //RENDER
         DrawPerspective(gCanvas, cam, world, distv, mapv, texv, SCREEN_HEIGHT);
 
-        DrawRays(gCanvas, cam, distv);
-        DrawCamera(gCanvas, cam);
-        DrawWorld(gCanvas, world);
+        // DrawRays(gCanvas, cam, distv);
+        // DrawCamera(gCanvas, cam);
+        // DrawWorld(gCanvas, world);
 
         //END RENDER
         SDL_BlitSurface(gCanvas, NULL, gScreenSurface, NULL);

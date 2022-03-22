@@ -95,9 +95,31 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv
     int halfH = screenH / 2;
 
     Uint32 *colv = (Uint32 *)malloc(TEXTURE_HEIGHT * sizeof(Uint32));
-    for (int i = distc - 1; i >= 0; i--) { //TODO: i feel like something isn't right here
+    for (int i = distc - 1; i >= 0; i--) {
+
+        float angle = Camera_GetRayAngles(cam)[i];
+
+        for (int k = halfH; k < screenH; k++) {
+            float floorDist = (WALL_HEIGHT/(float)(k-halfH)) * Camera_GetProjDist(cam);// * cos(angle - Camera_GetAngle(cam));
+
+            float floorX = floorDist * cos(angle) + Camera_GetX(cam);
+            float floorY = floorDist * sin(angle) + Camera_GetY(cam);
+
+            int floorDrawX = (int)floorX % TEXTURE_WIDTH;
+            int floorDrawY = (int)floorY % TEXTURE_HEIGHT;
+
+            SetPixel(surface,
+                i, k,
+                Texture_GetPixel(
+                    surface,
+                    World_GetFloorTexture(world),
+                    floorDrawX,
+                    floorDrawY
+            ));
+        }
+
         float dist = distv[i];
-        if (dist == maxDist) continue;
+        // if (dist == maxDist) continue;
 
         //https://stackoverflow.com/a/66664319/3785038
         float wallH = (screenH / dist);
@@ -118,6 +140,7 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv
                     ((color >> 8) & 0x000000ff) * lightRatio
                     );
         }
+
     }
 
 }

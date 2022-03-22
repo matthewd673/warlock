@@ -36,6 +36,8 @@ int Wall_GetTextureId(Wall w) { return w->textureId; }
 struct World {
     int wallCt;
     int textureCt;
+    int floorTexture;
+    int ceilTexture;
     Wall *walls;
     Texture *textures;
 };
@@ -86,6 +88,12 @@ World new_World(char const *filepath, SDL_PixelFormat *format) {
         else if (token[0] == 'T') { //set current texture i
             currentTexture = atoi(strtok(NULL, " ")) - 1; //1-indexed
         }
+        else if (token[0] == 'F') { //set floor texture i
+            this->floorTexture = atoi(strtok(NULL, " ")) - 1;
+        }
+        else if (token[0] == 'C') { //set ceil texture i
+            this->ceilTexture = atoi(strtok(NULL, " ")) - 1;
+        }
     }
 
     fclose(f);
@@ -109,3 +117,6 @@ int World_GetWallCt(World w) { return w->wallCt; }
 
 Texture *World_GetTextures(World w) { return w->textures; }
 int World_GetTextureCt(World w) { return w->textureCt; }
+
+Texture World_GetFloorTexture(World w) { return w->textures[w->floorTexture]; }
+Texture World_GetCeilTexture(World w) { return w->textures[w->ceilTexture]; }

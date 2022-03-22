@@ -44,17 +44,9 @@ unsigned char *Texture_GetRawImg(Texture texture) { return texture->img; }
 
 //really just for debug purposes to make sure its loaded
 void Texture_DrawImage(SDL_Surface *surface, Texture texture) {
-    int x = 0;
-    int y = 0;
-
-    int imgSize = texture->width * texture->height * texture->channels;
-    for (unsigned char *p = texture->img; p != texture->img + imgSize; p += texture->channels) {
-        SetPixel(surface, x, y, SDL_MapRGB(surface->format, *p, *(p + 1), *(p + 2)));
-
-        x++;
-        if (x == texture->width) {
-            x = 0;
-            y++;
+    for (int i = 0; i < texture->width; i++) {
+        for (int j = 0; j < texture->height; j++) {
+            SetPixel(surface, i, j, Texture_GetPixel(surface, texture, i, j));
         }
     }
 }
@@ -67,6 +59,11 @@ void Texture_GetColumn(SDL_Surface *surface, Texture texture, int colI, Uint32 *
         colv[i] = SDL_MapRGB(surface->format, *p, *(p + 1), *(p + 2));
         i++;
     }
+}
+
+Uint32 Texture_GetPixel(SDL_Surface *surface, Texture texture, int x, int y) {
+    unsigned char *p = texture->img + (texture->width*y + x)*texture->channels;
+    return SDL_MapRGB(surface->format, *p, *(p + 1), *(p + 2));
 }
 
 Texture *new_TextureArray(int ct) {

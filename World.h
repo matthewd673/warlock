@@ -15,7 +15,12 @@ int Wall_GetTextureId(Wall w);
 
 World new_World(char const *filepath, SDL_PixelFormat *format);
 void World_Free(World w);
+
 Wall *World_GetWalls(World w);
 int World_GetWallCt(World w);
+
 Texture *World_GetTextures(World w);
 int World_GetTextureCt(World w);
+
+Texture World_GetFloorTexture(World w);
+Texture World_GetCeilTexture(World w);
