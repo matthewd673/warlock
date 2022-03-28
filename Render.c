@@ -99,23 +99,27 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv
 
         float angle = Camera_GetRayAngles(cam)[i];
 
+        //https://gamedev.stackexchange.com/q/159285
         for (int k = halfH; k < screenH; k++) {
             float floorDist = (WALL_HEIGHT/(float)(k-halfH)) * Camera_GetProjDist(cam);// * cos(angle - Camera_GetAngle(cam));
 
+            // floorDist *= cos(angle - Camera_GetAngle(cam));
+            
             float floorX = floorDist * cos(angle) + Camera_GetX(cam);
             float floorY = floorDist * sin(angle) + Camera_GetY(cam);
 
             int floorDrawX = (int)floorX % TEXTURE_WIDTH;
             int floorDrawY = (int)floorY % TEXTURE_HEIGHT;
 
-            SetPixel(surface,
+            float floorLightRatio = 1 - (floorDist / maxDist);
+
+            Uint32 color = Texture_GetPixel(surface, World_GetFloorTexture(world), floorDrawX, floorDrawY);
+            SetPixelRGB(surface,
                 i, k,
-                Texture_GetPixel(
-                    surface,
-                    World_GetFloorTexture(world),
-                    floorDrawX,
-                    floorDrawY
-            ));
+                ((color >> 24) & 0x000000ff) * floorLightRatio,
+                ((color >> 16) & 0x000000ff) * floorLightRatio,
+                ((color >> 8) & 0x000000ff) * floorLightRatio
+                );
         }
 
         float dist = distv[i];
