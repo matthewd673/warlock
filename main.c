@@ -1,153 +1,112 @@
-#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
-#include <SDL2/SDL.h>
 
-#include "Camera.h"
-#include "Render.h"
-#include "Ray.h"
-#include "Texture.h"
+#include "raylib.h"
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#include "camera.h"
+#include "world.h"
+#include "ray.h"
 
-#define FOV 90
-#define CAM_SPEED 2
-#define CAM_TURNING_SPEED 0.1
+#define SCREEN_WIDTH        640
+#define SCREEN_HEIGHT       480
 
-SDL_Window *gWindow = NULL;
-SDL_Surface *gScreenSurface = NULL;
+#define FOV                 3.14 / 2
+#define CAM_SPEED           4
+#define CAM_TURNING_SPEED   0.05
 
-SDL_Surface *gCanvas = NULL;
+#define WALL_HEIGHT         10
 
-int Init() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf("Failed to initialize video: %s\n", SDL_GetError());
-        return 0;
+RayCamera cam;
+World world;
+
+float *disv;
+int *mapv;
+int *texv;
+
+void update();
+void render();
+
+int main() {
+    // create window
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib window");
+    SetTargetFPS(60);
+
+    // game setup
+    cam = new_Camera(0, 0, FOV, SCREEN_WIDTH, SCREEN_HEIGHT);
+    world = new_World("world.txt");
+    disv = (float *)malloc(Camera_GetRayc(cam) * sizeof(float));
+    mapv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
+    texv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
+
+    // game loop
+    Ray_Cast(cam, world, disv, mapv, texv);
+    while (!WindowShouldClose()) {
+        update();
+        render();
     }
 
-    gWindow = SDL_CreateWindow(
-        "sdlray",
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT,
-        SDL_WINDOW_SHOWN
-    );
+    // cleanup
+    CloseWindow();
+    free_Camera(cam);
+    free_World(world);
 
-    if (gWindow == NULL) {
-        printf("Failed to create window: %s\n", SDL_GetError());
-        return 0;
-    }
-    
-    gScreenSurface = SDL_GetWindowSurface(gWindow);
-    return 1;
+    return 0;
 }
 
-int CreateSurface() {
-    gCanvas = SDL_CreateRGBSurface(
-        0,
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT,
-        32,
-        0xff000000,
-        0x00ff0000,
-        0x0000ff00,
-        0x000000ff);
-    
-    if (gCanvas == NULL) return 0;
-
-    return 1;
-}
-
-void Quit() {
-    SDL_FreeSurface(gCanvas);
-    gCanvas = NULL;
-
-    SDL_DestroyWindow(gWindow);
-    gWindow = NULL;
-
-    SDL_Quit();
-}
-
-int main(int argc, char *argv[]) {
-    if (!Init()) {
-        printf("Failed to initialize\n");
-        return;
+void update() {
+    // move/turn and recalculate rays
+    if (IsKeyDown(KEY_W)) {
+        Camera_MoveForward(cam, CAM_SPEED);
+        Ray_Cast(cam, world, disv, mapv, texv);
+    }
+    else if (IsKeyDown(KEY_S)) {
+        Camera_MoveForward(cam, -CAM_SPEED);
+        Ray_Cast(cam, world, disv, mapv, texv);
     }
 
-    if (!CreateSurface()) {
-        printf("Failed to load media\n");
-        return;
+    if (IsKeyDown(KEY_A)) {
+        Camera_Turn(cam, -CAM_TURNING_SPEED);
+        Ray_Cast(cam, world, disv, mapv, texv);
     }
+    else if (IsKeyDown(KEY_D)) {
+        Camera_Turn(cam, CAM_TURNING_SPEED);
+        Ray_Cast(cam, world, disv, mapv, texv);
+    }
+}
 
-    // Texture stone = new_Texture("content/stone.png");
+void DrawPerspective() {
+    int rayc = Camera_GetRayc(cam);
+    float maxDist = Camera_GetProjDist(cam);
+    int halfH = SCREEN_HEIGHT / 2;
 
-    int abort = 0;
-    SDL_Event e;
+    for (int i = rayc - 1; i >= 0; i--) {
+        float angle = Camera_GetRayv(cam)[i];
+        float dist = disv[i];
 
-    Camera cam = new_Camera(0, 0);
-    Camera_SetHalfRays(cam, SCREEN_WIDTH / 2);
-    Camera_SetFOV(cam, (FOV/360.0) * 2*3.14);
-    Camera_SetProjDist(cam, SCREEN_HEIGHT);
-    World world = new_World("input.txt", gCanvas->format);
-
-    float *distv = (float *)calloc(Camera_GetHalfRays(cam) * 2, sizeof(float));
-    int *mapv = (int *)malloc(Camera_GetHalfRays(cam) * 2 * sizeof(int));
-    int *texv = (int *)malloc(Camera_GetHalfRays(cam) * 2 * sizeof(int));
-    Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
-
-    //game loop
-    while (!abort) {
-        //event loop
-        while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT) abort = 1;
-            else if (e.type == SDL_KEYDOWN) {
-                switch (e.key.keysym.sym) {
-                    case SDLK_ESCAPE:
-                        abort = 1;
-                        break;
-                    case SDLK_w:
-                        Camera_Move(cam, CAM_SPEED);
-                        Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
-                        break;
-                    case SDLK_a:
-                        Camera_IncAngle(cam, -CAM_TURNING_SPEED);
-                        Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
-                        break;
-                    case SDLK_s:
-                        Camera_Move(cam, -CAM_SPEED);
-                        Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
-                        break;
-                    case SDLK_d:
-                        Camera_IncAngle(cam, CAM_TURNING_SPEED);
-                        Ray_CastFromCamera(distv, mapv, texv, cam, world, gCanvas->format);
-                        break;
-                }
-            }
+        // https://stackoverflow.com/a/66664319/3785038
+        float wallH = (SCREEN_HEIGHT / dist);
+        wallH *= WALL_HEIGHT;
+        if (wallH > SCREEN_HEIGHT) {
+            wallH = SCREEN_HEIGHT;
         }
 
-        //BEGIN RENDER
-        //TODO: this is sloppy, but good enough for now
-        SDL_FillRect(gScreenSurface, NULL, 0x000000);
-        SDL_FillRect(gCanvas, NULL, 0x000000);
+        float lightRatio = 1 - (dist / maxDist); // TODO: inverse square stuff
 
-        //RENDER
-        DrawPerspective(gCanvas, cam, world, distv, mapv, texv, SCREEN_HEIGHT);
-
-        // DrawRays(gCanvas, cam, distv);
-        // DrawCamera(gCanvas, cam);
-        // DrawWorld(gCanvas, world);
-
-        //END RENDER
-        SDL_BlitSurface(gCanvas, NULL, gScreenSurface, NULL);
-        SDL_UpdateWindowSurface(gWindow);
+        for (int k = 0; k < round(wallH * 2.0); k++) {
+            Color col = WHITE;
+            col.r *= lightRatio;
+            col.g *= lightRatio;
+            col.b *= lightRatio;
+            DrawRectangle(i, round(halfH - wallH) + k, 1, 1, col);
+        }
     }
+}
 
-    //free
-    free(distv);
-    // free(colorv);
-    Camera_Free(cam);
-    World_Free(world);
+void render() {
+    BeginDrawing();
+    ClearBackground(BLACK);
 
-    Quit();
+    DrawPerspective();
+
+    EndDrawing();
 }

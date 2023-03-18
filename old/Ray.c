@@ -2,20 +2,16 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "ray.h"
-#include "camera.h"
-#include "world.h"
+#include "Ray.h"
 
-struct Point {
+struct CollPoint {
     float x;
     float y;
 };
 
-Point new_Point(float x, float y) {
-    Point this = (Point)malloc(sizeof(struct Point));
-    if (this == NULL) {
-        return NULL;
-    }
+CollPoint new_CollPoint(float x, float y) {
+    CollPoint this = (CollPoint)malloc(sizeof(struct CollPoint));
+    if (this == NULL) return NULL;
 
     this->x = x;
     this->y = y;
@@ -23,16 +19,17 @@ Point new_Point(float x, float y) {
     return this;
 }
 
-float Point_GetX(Point p) {
-    return p->x;
+float CollPoint_GetX(CollPoint p) { return p->x; }
+float CollPoint_GetY(CollPoint p) { return p->y; }
+void CollPoint_SetX(CollPoint p, float x) {
+    p->x = x;
+}
+void CollPoint_SetY(CollPoint p, float y) {
+    p->y = y;
 }
 
-float Point_GetY(Point p) {
-    return p->y;
-}
-
-// https://gamedev.stackexchange.com/a/117294
-int Ray_RRCollision(Point p,
+//https://gamedev.stackexchange.com/a/117294
+int Ray_RRCollision(CollPoint point,
                     float aX1, float aY1, float aX2, float aY2,
                     float bX1, float bY1, float bX2, float bY2) {
 
@@ -44,11 +41,11 @@ int Ray_RRCollision(Point p,
     float iX = aX1 + r*(aX2-aX1);
     float iY = aY1 + r*(aY2-aY1);
 
-    if (r < 0 || r > 1 || s < 0 || s > 1) // intersection doesn't exist
+    if (r < 0 || r > 1 || s < 0 || s > 1) //intersection doesn't exist
         return 0;
 
-    p->x = iX;
-    p->y = iY;
+    point->x = iX;
+    point->y = iY;
 
     return 1;
 }
@@ -57,10 +54,10 @@ float Ray_DistBetweenPoints(float x1, float y1, float x2, float y2) {
     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
-void Ray_Cast(RayCamera cam, World world, float *disv, int *mapv, int *texv) {
-    int halfRays = Camera_GetHalfRayc(cam);
+void Ray_CastFromCamera(float *distv, int *mapv, int *texv, RayCamera cam, World world, SDL_PixelFormat *format) {
+    int halfRays = Camera_GetHalfRays(cam);
     for (int i = 0; i < halfRays * 2; i++) {
-        float angle = Camera_GetRayv(cam)[i];
+        float angle = Camera_GetRayAngles(cam)[i];
         float rX1 = Camera_GetX(cam);
         float rY1 = Camera_GetY(cam);
 
@@ -72,15 +69,15 @@ void Ray_Cast(RayCamera cam, World world, float *disv, int *mapv, int *texv) {
         float rX2 = rX1 + cos(angle)*Camera_GetProjDist(cam);//*cos(angle - Camera_GetAngle(cam));
         float rY2 = rY1 + sin(angle)*Camera_GetProjDist(cam);//*cos(angle - Camera_GetAngle(cam));
 
-        Point currentColl = new_Point(0, 0);
+        CollPoint currentColl = new_CollPoint(0, 0);
         float nearestDist = Camera_GetProjDist(cam);
         int nearestMap = 0;
         int nearestTex = 0;
-        // TODO: inefficient for large worlds
-        for (int j = 0; j < World_GetWallc(world); j++) {
-            Wall w = World_GetWallv(world)[j];
+        //TODO: inefficient for large worlds
+        for (int j = 0; j < World_GetWallCt(world); j++) {
+            Wall w = World_GetWalls(world)[j];
 
-            Point c = new_Point(0, 0);
+            CollPoint c = new_CollPoint(0, 0);
             if (!Ray_RRCollision(c,
                 rX1, rY1, rX2, rY2,
                 Wall_GetX1(w), Wall_GetY1(w), Wall_GetX2(w), Wall_GetY2(w)))
@@ -95,8 +92,7 @@ void Ray_Cast(RayCamera cam, World world, float *disv, int *mapv, int *texv) {
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;
                 nearestMap = round(Ray_DistBetweenPoints(c->x, c->y, Wall_GetX1(w), Wall_GetY1(w)));
-                // nearestTex = Wall_GetTextureId(w);
-                nearestTex = 0;
+                nearestTex = Wall_GetTextureId(w);
                 free(currentColl);
                 currentColl = c;
             }
@@ -105,7 +101,7 @@ void Ray_Cast(RayCamera cam, World world, float *disv, int *mapv, int *texv) {
             }
         }
 
-        disv[i] = nearestDist;
+        distv[i] = nearestDist;
         mapv[i] = nearestMap;
         texv[i] = nearestTex;
     }

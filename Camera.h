@@ -1,27 +1,22 @@
-typedef struct Camera *Camera;
+typedef struct RayCamera *RayCamera;
 
-Camera new_Camera(float x, float y);
-void Camera_Free(Camera cam);
+RayCamera new_Camera(float x, float y, float fov, int rayc, float projDist);
+void free_Camera(RayCamera cam);
 
-void Camera_SetPos(Camera cam, float x, float y);
-void Camera_Move(Camera cam, float m);
-float Camera_GetX(Camera cam);
-float Camera_GetY(Camera cam);
+void Camera_SetPos(RayCamera cam, float x, float y);
+void Camera_MoveForward(RayCamera cam, float m);
+float Camera_GetX(RayCamera cam);
+float Camera_GetY(RayCamera cam);
 
-void Camera_SetAngle(Camera cam, float angle);
-void Camera_IncAngle(Camera cam, float dAngle);
-float Camera_GetAngle(Camera cam);
-float Camera_GetCosAngle(Camera cam);
-float Camera_GetSinAngle(Camera cam);
+void Camera_SetAngle(RayCamera cam, float angle);
+void Camera_Turn(RayCamera cam, float delta);
+float Camera_GetAngle(RayCamera cam);
+float Camera_GetAngleCos(RayCamera cam);
+float Camera_GetAngleSin(RayCamera cam);
 
-void Camera_SetProjDist(Camera cam, float projDist);
-float Camera_GetProjDist(Camera cam);
+float Camera_GetProjDist(RayCamera cam);
 
-void Camera_SetFOV(Camera cam, float fov);
-int Camera_GetFOV(Camera cam);
-
-void Camera_SetHalfRays(Camera cam, int halfRays);
-int Camera_GetHalfRays(Camera cam);
-
-void Camera_CalculateRayAngles(Camera cam);
-float *Camera_GetRayAngles(Camera cam);
+int Camera_GetRayc(RayCamera cam);
+int Camera_GetHalfRayc(RayCamera cam);
+void Camera_CalculateRayv(RayCamera cam);
+float *Camera_GetRayv(RayCamera cam);

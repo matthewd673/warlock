@@ -1,17 +1,15 @@
-#include "Camera.h"
-#include "World.h"
+#include "camera.h"
+#include "world.h"
 
-typedef struct CollPoint *CollPoint;
+typedef struct Point *Point;
 
-CollPoint new_CollPoint(float x, float y);
-float CollPoint_GetX(CollPoint p);
-float CollPoint_GetY(CollPoint p);
-void CollPoint_SetX(CollPoint p, float x);
-void CollPoint_SetY(CollPoint p, float y);
+Point new_Point(float x, float y);
 
-int Ray_RRCollision(CollPoint point,
-                    float aX1, float aY1, float aX2, float AY2,
-                    float bX1, float bY1, float bX2, float BY2);
+float Point_GetX(Point p);
+float Point_GetY(Point p);
 
-float Ray_DistBetweeenPoints(float x1, float y1, float x2, float y2);
-void Ray_CastFromCamera(float *distv, int *mapv, int *texv, Camera cam, World w, SDL_PixelFormat *format);
+int Ray_RRCollision(Point p,
+                    float aX1, float aY1, float aX2, float aY2,
+                    float bX1, float bY1, float bX2, float bY2);
+float Ray_DistBetweenPoints(float x1, float y1, float x2, float y2);
+void Ray_Cast(RayCamera cam, World world, float *disv, int *mapv, int *texv);

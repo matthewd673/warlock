@@ -49,7 +49,7 @@ void DrawLineRGB(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint8 r, 
     DrawLine(surface, x1, y1, x2, y2, SDL_MapRGB(surface->format, r, g, b));
 }
 
-void DrawCamera(SDL_Surface *surface, Camera cam) {
+void DrawCamera(SDL_Surface *surface, RayCamera cam) {
     DrawLineRGB(
         surface,
         Camera_GetX(cam),
@@ -60,7 +60,7 @@ void DrawCamera(SDL_Surface *surface, Camera cam) {
         );
 }
 
-void DrawRays(SDL_Surface *surface, Camera cam, float *distv) {
+void DrawRays(SDL_Surface *surface, RayCamera cam, float *distv) {
     int distc = Camera_GetHalfRays(cam) * 2;
     for (int i = 0; i < distc; i++) {
         float angle = Camera_GetRayAngles(cam)[i];
@@ -89,7 +89,7 @@ void DrawWorld(SDL_Surface *surface, World w) {
     }
 }
 
-void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv, int *mapv, int *texv, int screenH) {
+void DrawPerspective(SDL_Surface *surface, RayCamera cam, World world, float *distv, int *mapv, int *texv, int screenH) {
     int distc = Camera_GetHalfRays(cam) * 2;
     float maxDist = Camera_GetProjDist(cam);
     int halfH = screenH / 2;
@@ -104,7 +104,7 @@ void DrawPerspective(SDL_Surface *surface, Camera cam, World world, float *distv
             float floorDist = (WALL_HEIGHT/(float)(k-halfH)) * Camera_GetProjDist(cam);// * cos(angle - Camera_GetAngle(cam));
 
             // floorDist *= cos(angle - Camera_GetAngle(cam));
-            
+
             float floorX = floorDist * cos(angle) + Camera_GetX(cam);
             float floorY = floorDist * sin(angle) + Camera_GetY(cam);
 
