@@ -37,7 +37,7 @@ int main() {
     SetTargetFPS(60);
 
     // game setup
-    cam = new_Camera(0, 0, FOV, SCREEN_WIDTH, SCREEN_HEIGHT);
+    cam = new_Camera(0, 0, FOV, SCREEN_WIDTH, SCREEN_HEIGHT * 2);
     world = new_World("world.txt");
     disv = (float *)malloc(Camera_GetRayc(cam) * sizeof(float));
     mapv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
@@ -84,6 +84,27 @@ void update() {
     }
 }
 
+void DrawOverhead() {
+    // draw walls
+    int wallc = World_GetWallc(world);
+    Wall *wallv = World_GetWallv(world);
+    for (int i = 0; i < wallc; i++) {
+        DrawLine(
+            Wall_GetX1(wallv[i]), Wall_GetY1(wallv[i]),
+            Wall_GetX2(wallv[i]), Wall_GetY2(wallv[i]),
+            RAYWHITE);
+    }
+
+    // draw camera
+    int camx = Camera_GetX(cam);
+    int camy = Camera_GetY(cam);
+    DrawLine(camx, camy,
+        camx + Camera_GetAngleCos(cam) * 10,
+        camy + Camera_GetAngleSin(cam) * 10,
+        WHITE);
+    DrawCircle(camx, camy, 2, WHITE);
+}
+
 void DrawPerspective() {
     int rayc = Camera_GetRayc(cam);
     float maxDist = Camera_GetProjDist(cam);
@@ -94,9 +115,12 @@ void DrawPerspective() {
         float dist = disv[i];
         int map = mapv[i];
 
+
+        if (dist == maxDist) continue;
+
         // https://stackoverflow.com/a/66664319/3785038
-        float wallH = (SCREEN_HEIGHT / dist);
-        wallH *= WALL_HEIGHT;
+        float wallH = (SCREEN_HEIGHT / dist) * WALL_HEIGHT;
+
         if (wallH > SCREEN_HEIGHT) {
             wallH = SCREEN_HEIGHT;
         }
@@ -104,19 +128,21 @@ void DrawPerspective() {
         float lightRatio = 1 - (dist / maxDist); // TODO: inverse square stuff
 
         float wallRenderH = round(wallH * 2.0);
-        float texHRatio = alltexh / (wallH * 2);
+        float texHRatio = alltexh / (wallH * 2.0);
         for (int k = 0; k < wallRenderH; k++) {
-            Color col = alltexcol[(int)round(k * texHRatio) * alltexw + map];
+            // texture point row and column
+            int texr = (int)round(k * texHRatio);
+            int texc = map % alltexw;
+            Color col = alltexcol[texr * alltexw + texc];
+
+            // if (k == 0 || k == wallRenderH - 1)
+            //     col = RED;
+
             col.r *= lightRatio;
             col.g *= lightRatio;
             col.b *= lightRatio;
-            DrawRectangle(i, round(halfH - wallH) + k, 1, 1, col);
-        }
-    }
 
-    for (int i = 0; i < alltexw; i++) {
-        for (int j = 0; j < alltexh; j++) {
-            DrawRectangle(i, j, 1, 1, alltexcol[j * alltexw + i]);
+            DrawRectangle(i, round(halfH - wallH) + k, 1, 1, col);
         }
     }
 }
@@ -126,6 +152,7 @@ void render() {
     ClearBackground(BLACK);
 
     DrawPerspective();
+    DrawOverhead();
 
     EndDrawing();
 }

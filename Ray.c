@@ -80,18 +80,21 @@ void Ray_Cast(RayCamera cam, World world, float *disv, int *mapv, int *texv) {
         for (int j = 0; j < World_GetWallc(world); j++) {
             Wall w = World_GetWallv(world)[j];
 
+            // attempt to find ray collision point
             Point c = new_Point(0, 0);
             if (!Ray_RRCollision(c,
                 rX1, rY1, rX2, rY2,
                 Wall_GetX1(w), Wall_GetY1(w), Wall_GetX2(w), Wall_GetY2(w)))
             {
                 free(c);
+
                 continue;
             }
 
             float dist = Ray_DistBetweenPoints(rX1, rY1, c->x, c->y);
             dist *= cos(angle - Camera_GetAngle(cam)); //correct for fisheye
 
+            // found new closest wall
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;
                 nearestMap = round(Ray_DistBetweenPoints(c->x, c->y, Wall_GetX1(w), Wall_GetY1(w)));
@@ -100,6 +103,7 @@ void Ray_Cast(RayCamera cam, World world, float *disv, int *mapv, int *texv) {
                 free(currentColl);
                 currentColl = c;
             }
+            // new intersection is farther than the last
             else {
                 free(c);
             }
