@@ -85,7 +85,7 @@ World new_World(char const *filepath) {
     fclose(f);
 
     this->wallc = wallIndex;
-    printf("%d wallv loaded from %s", this->wallc, filepath);
+    printf("%d walls loaded from %s\n", this->wallc, filepath);
     return this;
 }
 

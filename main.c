@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
 #include "raylib.h"
@@ -23,6 +24,10 @@ float *disv;
 int *mapv;
 int *texv;
 
+Color *alltexcol;
+int alltexw;
+int alltexh;
+
 void update();
 void render();
 
@@ -37,6 +42,11 @@ int main() {
     disv = (float *)malloc(Camera_GetRayc(cam) * sizeof(float));
     mapv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
     texv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
+
+    Image alltex = LoadImage("stone.png");
+    alltexcol = LoadImageColors(alltex);
+    alltexw = alltex.width;
+    alltexh = alltex.height;
 
     // game loop
     Ray_Cast(cam, world, disv, mapv, texv);
@@ -82,6 +92,7 @@ void DrawPerspective() {
     for (int i = rayc - 1; i >= 0; i--) {
         float angle = Camera_GetRayv(cam)[i];
         float dist = disv[i];
+        int map = mapv[i];
 
         // https://stackoverflow.com/a/66664319/3785038
         float wallH = (SCREEN_HEIGHT / dist);
@@ -92,12 +103,20 @@ void DrawPerspective() {
 
         float lightRatio = 1 - (dist / maxDist); // TODO: inverse square stuff
 
-        for (int k = 0; k < round(wallH * 2.0); k++) {
-            Color col = WHITE;
+        float wallRenderH = round(wallH * 2.0);
+        float texHRatio = alltexh / (wallH * 2);
+        for (int k = 0; k < wallRenderH; k++) {
+            Color col = alltexcol[(int)round(k * texHRatio) * alltexw + map];
             col.r *= lightRatio;
             col.g *= lightRatio;
             col.b *= lightRatio;
             DrawRectangle(i, round(halfH - wallH) + k, 1, 1, col);
+        }
+    }
+
+    for (int i = 0; i < alltexw; i++) {
+        for (int j = 0; j < alltexh; j++) {
+            DrawRectangle(i, j, 1, 1, alltexcol[j * alltexw + i]);
         }
     }
 }
