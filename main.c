@@ -15,7 +15,7 @@
 #define CAM_SPEED           4
 #define CAM_TURNING_SPEED   0.05
 
-#define WALL_HEIGHT         10
+#define WALL_HEIGHT         12
 
 RayCamera cam;
 World world;
@@ -115,34 +115,62 @@ void DrawPerspective() {
         float dist = disv[i];
         int map = mapv[i];
 
-
-        if (dist == maxDist) continue;
+        // if (dist == maxDist) continue;
 
         // https://stackoverflow.com/a/66664319/3785038
         float wallH = (SCREEN_HEIGHT / dist) * WALL_HEIGHT;
-
-        if (wallH > SCREEN_HEIGHT) {
-            wallH = SCREEN_HEIGHT;
-        }
+        wallH = wallH > SCREEN_HEIGHT ? SCREEN_HEIGHT : wallH;
 
         float lightRatio = 1 - (dist / maxDist); // TODO: inverse square stuff
 
         float wallRenderH = round(wallH * 2.0);
         float texHRatio = alltexh / (wallH * 2.0);
-        for (int k = 0; k < wallRenderH; k++) {
-            // texture point row and column
-            int texr = (int)round(k * texHRatio);
-            int texc = map % alltexw;
-            Color col = alltexcol[texr * alltexw + texc];
+        for (int k = 0; k < SCREEN_HEIGHT; k++) {
+            // render walls when in range
+            if (dist != maxDist &&
+                k >= round(halfH-wallH) &&
+                k <= round(halfH-wallH) + wallRenderH) {
+                // texture point row and column
+                int texr = (int)floor((k-round(halfH-wallH)) * texHRatio);
+                int texc = map % alltexw;
 
-            // if (k == 0 || k == wallRenderH - 1)
-            //     col = RED;
+                Color col = alltexcol[texr * alltexw + texc];
 
-            col.r *= lightRatio;
-            col.g *= lightRatio;
-            col.b *= lightRatio;
+                col.r *= lightRatio;
+                col.g *= lightRatio;
+                col.b *= lightRatio;
 
-            DrawRectangle(i, round(halfH - wallH) + k, 1, 1, col);
+                DrawRectangle(i, k, 1, 1, col);
+            }
+            // floor
+            else if (k >= halfH) {
+                float ray = Camera_GetRayv(cam)[i];
+                float beta = fabsf(ray - Camera_GetAngle(cam));
+                int r = k - halfH;
+                int playerH = WALL_HEIGHT / 2;
+                float straightLineDist = playerH * Camera_GetProjDist(cam) / r;
+
+                float d = straightLineDist / cos(beta);
+
+                float fx = Camera_GetX(cam) + cos(ray) * d;
+                float fy = Camera_GetY(cam) + sin(ray) * d;
+
+                int texr = abs((int)round(fy) % alltexh);
+                int texc = abs((int)round(fx) % alltexw);
+                Color col = alltexcol[texr * alltexw + texc];
+                // col.r += fy;
+                // col.g += fx;
+                // col.b += fy;
+                // col.r %= 255;
+                // col.g %= 255;
+                // col.b %= 255;
+
+                DrawRectangle(i, k, 1, 1, col);
+            }
+            // ceiling
+            else if (k <= halfH) {
+                DrawRectangle(i, k, 1, 1, DARKBLUE);
+            }
         }
     }
 }
