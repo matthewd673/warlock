@@ -98,8 +98,7 @@ void Ray_Cast(RayCamera cam, World world, float *disv, int *mapv, int *texv) {
             if (nearestDist < 0 || dist < nearestDist) {
                 nearestDist = dist;
                 nearestMap = round(Ray_DistBetweenPoints(c->x, c->y, Wall_GetX1(w), Wall_GetY1(w)));
-                // nearestTex = Wall_GetTextureId(w);
-                nearestTex = 0;
+                nearestTex = Wall_GetTexi(w);
                 free(currentColl);
                 currentColl = c;
             }

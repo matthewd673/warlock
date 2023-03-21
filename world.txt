@@ -1,21 +1,21 @@
 # allocate 1 texture
-# A 4
+A 3
 # define all textures
-# L content/stone.png
-# L content/processor.png
-# L content/debug2.png
-# L content/grass.png
+L res/stone.png
+L res/processor.png
+L res/grass.png
+L res/ceiltile.png
 
 # stone box
-# T 1
+T 0
 E 100 150 100 400
 E 100 400 500 400
 E 100 150 500 100
 
 # cpu wall
-# T 2
+T 1
 E 50 400 50 100
 
 # floor and ceil
-# F 2
-# C (not yet implemented)
+F 2
+C 3

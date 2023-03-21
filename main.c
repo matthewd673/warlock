@@ -24,16 +24,16 @@ float *disv;
 int *mapv;
 int *texv;
 
-Color *alltexcol;
-int alltexw;
-int alltexh;
+// Color *alltexcol;
+// int alltexw;
+// int alltexh;
 
 void update();
 void render();
 
 int main() {
     // create window
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib window");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "warlock");
     SetTargetFPS(60);
 
     // game setup
@@ -43,10 +43,10 @@ int main() {
     mapv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
     texv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
 
-    Image alltex = LoadImage("stone.png");
-    alltexcol = LoadImageColors(alltex);
-    alltexw = alltex.width;
-    alltexh = alltex.height;
+    // Image alltex = LoadImage("res/stone.png");
+    // alltexcol = LoadImageColors(alltex);
+    // alltexw = alltex.width;
+    // alltexh = alltex.height;
 
     // game loop
     Ray_Cast(cam, world, disv, mapv, texv);
@@ -114,8 +114,7 @@ void DrawPerspective() {
         float angle = Camera_GetRayv(cam)[i];
         float dist = disv[i];
         int map = mapv[i];
-
-        // if (dist == maxDist) continue;
+        WTexture tex = World_GetTexv(world)[texv[i]];
 
         // https://stackoverflow.com/a/66664319/3785038
         float wallH = (SCREEN_HEIGHT / dist) * WALL_HEIGHT;
@@ -124,26 +123,31 @@ void DrawPerspective() {
         float lightRatio = 1 - (dist / maxDist); // TODO: inverse square stuff
 
         float wallRenderH = round(wallH * 2.0);
-        float texHRatio = alltexh / (wallH * 2.0);
+        float texHRatio = WTexture_GetHeight(tex) / (wallH * 2.0);
         for (int k = 0; k < SCREEN_HEIGHT; k++) {
             // render walls when in range
             if (dist != maxDist &&
                 k >= round(halfH-wallH) &&
                 k <= round(halfH-wallH) + wallRenderH) {
+
+                tex = World_GetTexv(world)[texv[i]];
                 // texture point row and column
                 int texr = (int)floor((k-round(halfH-wallH)) * texHRatio);
-                int texc = map % alltexw;
+                int texc = map % WTexture_GetWidth(tex);
 
-                Color col = alltexcol[texr * alltexw + texc];
+                Color col = WTexture_GetColors(tex)[texr * WTexture_GetWidth(tex) + texc];
 
-                col.r *= lightRatio;
-                col.g *= lightRatio;
-                col.b *= lightRatio;
+                // col.r *= lightRatio;
+                // col.g *= lightRatio;
+                // col.b *= lightRatio;
 
                 DrawRectangle(i, k, 1, 1, col);
             }
             // floor
+            // https://wynnliam.github.io/raycaster/news/tutorial/2019/04/09/raycaster-part-03.html
             else if (k >= halfH) {
+                tex = World_GetTexv(world)[World_GetFloorTexi(world)];
+
                 float ray = Camera_GetRayv(cam)[i];
                 float beta = fabsf(ray - Camera_GetAngle(cam));
                 int r = k - halfH;
@@ -155,21 +159,35 @@ void DrawPerspective() {
                 float fx = Camera_GetX(cam) + cos(ray) * d;
                 float fy = Camera_GetY(cam) + sin(ray) * d;
 
-                int texr = abs((int)round(fy) % alltexh);
-                int texc = abs((int)round(fx) % alltexw);
-                Color col = alltexcol[texr * alltexw + texc];
-                // col.r += fy;
-                // col.g += fx;
-                // col.b += fy;
-                // col.r %= 255;
-                // col.g %= 255;
-                // col.b %= 255;
+                // texture point row and column
+                int texr = abs((int)round(fy) % WTexture_GetHeight(tex));
+                int texc = abs((int)round(fx) % WTexture_GetWidth(tex));
+                Color col = WTexture_GetColors(tex)[texr * WTexture_GetWidth(tex) + texc];
 
                 DrawRectangle(i, k, 1, 1, col);
             }
-            // ceiling
+            // ceiling (virtually the same as floor)
             else if (k <= halfH) {
-                DrawRectangle(i, k, 1, 1, DARKBLUE);
+                tex = World_GetTexv(world)[World_GetCeilTexi(world)];
+
+                float ray = Camera_GetRayv(cam)[i];
+                float beta = fabsf(ray - Camera_GetAngle(cam));
+                int r = k - halfH;
+                int playerH = WALL_HEIGHT / 2;
+                float straightLineDist = playerH * Camera_GetProjDist(cam) / r;
+
+                float d = straightLineDist / cos(beta);
+
+                // NOTE: -sin and -cos, unlike floor
+                float fx = Camera_GetX(cam) - cos(ray) * d;
+                float fy = Camera_GetY(cam) - sin(ray) * d;
+
+                // texture point row and column
+                int texr = abs((int)round(fy) % WTexture_GetHeight(tex));
+                int texc = abs((int)round(fx) % WTexture_GetWidth(tex));
+                Color col = WTexture_GetColors(tex)[texr * WTexture_GetWidth(tex) + texc];
+
+                DrawRectangle(i, k, 1, 1, col);
             }
         }
     }

@@ -7,3 +7,4 @@ The pages for each *.png in the folder are listed below:
 - [stone.png](https://opengameart.org/content/tiles-3)
 - [processor.png](https://opengameart.org/content/cpu)
 - [grass.png](https://opengameart.org/content/grass-texture-pack)
+- [ceiltile.png](https://opengameart.org/content/tile-texture)
