@@ -1,8 +1,7 @@
 *.exe
 *.dll
 
-.vscode/
-include/
-lib/
+.vscode
+*.dSYM
 
 Game

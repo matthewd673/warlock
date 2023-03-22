@@ -5,6 +5,7 @@ typedef struct Wall *Wall;
 typedef struct World *World;
 
 WTexture new_WTexture(Color *col, int w, int h);
+void free_WTexture(WTexture t);
 Color *WTexture_GetColors(WTexture t);
 int WTexture_GetWidth(WTexture t);
 int WTexture_GetHeight(WTexture t);

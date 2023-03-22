@@ -24,6 +24,11 @@ WTexture new_WTexture(Color *col, int w, int h) {
     return this;
 }
 
+void free_WTexture(WTexture t) {
+    free(t->col);
+    free(t);
+}
+
 Color *WTexture_GetColors(WTexture t) {
     return t->col;
 }
@@ -177,7 +182,7 @@ void free_World(World w) {
     free(w->wallv);
 
     for (int i = 0; i < w->texc; i++) {
-        free(w->texv[i]);
+        free_WTexture(w->texv[i]);
     }
     free(w->texv);
 

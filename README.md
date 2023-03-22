@@ -1,6 +1,6 @@
 # warlock
 
-Raycasting *(not tracing)* in C with raylib.
+Warlock is a raycasting *(not tracing)* engine built in C with raylib. Currently, it is most comparable to the Wolf3D renderer except with textured floors and ceilings.
 
 ## Build & Run
 
@@ -22,10 +22,10 @@ World files are very rudimentary, they consist of one-letter commands followd by
 - **Load textures:**
   - **Allocate the correct number of texture slots:** `A [ct]`
   - **Load a texture:** `L [filepath]`
-- **Set the current texture:** `T 0` (0-indexed, same order they were loaded in)
+- **Set the current wall texture:** `T [texi]` (where `texi` is a texture index, 0-indexed and same order they were loaded in)
 - **Define a new edge:** `E [x1] [y1] [x2] [y2]`
-- **Define the floor texture:** `F [i]`
-- **Define the ceiling texture:** `C [i]`
+- **Set the floor texture:** `F [texi]` (where `texi` is the index of a texture in the array)
+- **Set the ceiling texture:** `C [texi]`
 - Any line starting with `#` is ignored
 
 Each edge (wall) will be textured according to the last texture command *(default: 0)*.

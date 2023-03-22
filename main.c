@@ -24,10 +24,6 @@ float *disv;
 int *mapv;
 int *texv;
 
-// Color *alltexcol;
-// int alltexw;
-// int alltexh;
-
 void update();
 void render();
 
@@ -43,11 +39,6 @@ int main() {
     mapv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
     texv = (int *)malloc(Camera_GetRayc(cam) * sizeof(int));
 
-    // Image alltex = LoadImage("res/stone.png");
-    // alltexcol = LoadImageColors(alltex);
-    // alltexw = alltex.width;
-    // alltexh = alltex.height;
-
     // game loop
     Ray_Cast(cam, world, disv, mapv, texv);
     while (!WindowShouldClose()) {
@@ -59,6 +50,10 @@ int main() {
     CloseWindow();
     free_Camera(cam);
     free_World(world);
+
+    free(disv);
+    free(mapv);
+    free(texv);
 
     return 0;
 }
@@ -92,7 +87,7 @@ void DrawOverhead() {
         DrawLine(
             Wall_GetX1(wallv[i]), Wall_GetY1(wallv[i]),
             Wall_GetX2(wallv[i]), Wall_GetY2(wallv[i]),
-            RAYWHITE);
+            WHITE);
     }
 
     // draw camera
@@ -110,11 +105,14 @@ void DrawPerspective() {
     float maxDist = Camera_GetProjDist(cam);
     int halfH = SCREEN_HEIGHT / 2;
 
+    // default texture value
+    WTexture tex = World_GetTexv(world)[0];
+
     for (int i = rayc - 1; i >= 0; i--) {
         float angle = Camera_GetRayv(cam)[i];
         float dist = disv[i];
         int map = mapv[i];
-        WTexture tex = World_GetTexv(world)[texv[i]];
+        tex = World_GetTexv(world)[texv[i]];
 
         // https://stackoverflow.com/a/66664319/3785038
         float wallH = (SCREEN_HEIGHT / dist) * WALL_HEIGHT;
