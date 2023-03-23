@@ -11,13 +11,25 @@ I'm using macOS but Warlock should run anywhere that raylib does (and raylib run
 **Build & run commands**
 
 ```
+cd warlock
 cc *.c `pkg-config --libs --cflags raylib` -o game
 ./game
 ```
 
+## golem
+
+Golem is a tool to build warlock levels. Like Warlock, Golem only needs raylib to build.
+
+**Build & run commands**
+```
+cd golem
+cc *.c `pkg-config --libs --cflags raylib` -o editor
+./editor
+```
+
 ## World Files
 
-World files are very rudimentary, they consist of one-letter commands 
+World files are very rudimentary, they consist of one-letter commands
 followed by arguments.
 
 - **Load textures:**
