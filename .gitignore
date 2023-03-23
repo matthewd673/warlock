@@ -1,7 +1,7 @@
-*.exe
-*.dll
-
+# directories
 .vscode
 *.dSYM
 
+# builds
 Game
+Editor

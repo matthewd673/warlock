@@ -37,6 +37,28 @@ int Wall_getY2(Wall w) {
     return w->y2;
 }
 
+struct Sprite {
+    int x;
+    int y;
+};
+
+Sprite new_Sprite(int x, int y) {
+    Sprite this = (Sprite)malloc(sizeof(struct Sprite));
+
+    this->x = x;
+    this->y = y;
+
+    return this;
+}
+
+int Sprite_getX(Sprite s) {
+    return s->x;
+}
+
+int Sprite_getY(Sprite s) {
+    return s->y;
+}
+
 struct Workspace {
     LL wallv;
     LL spritev;
