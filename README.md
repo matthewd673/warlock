@@ -17,14 +17,15 @@ cc *.c `pkg-config --libs --cflags raylib` -o game
 
 ## World Files
 
-World files are very rudimentary, they consist of one-letter commands followd by arguments.
+World files are very rudimentary, they consist of one-letter commands 
+followed by arguments.
 
 - **Load textures:**
   - **Allocate the correct number of texture slots:** `A [ct]`
   - **Load a texture:** `L [filepath]`
 - **Set the current wall texture:** `T [texi]` (where `texi` is a texture index, 0-indexed and same order they were loaded in)
 - **Define a new edge:** `E [x1] [y1] [x2] [y2]`
-- **Set the floor texture:** `F [texi]` (where `texi` is the index of a texture in the array)
+- **Set the floor texture:** `F [texi]`
 - **Set the ceiling texture:** `C [texi]`
 - Any line starting with `#` is ignored
 

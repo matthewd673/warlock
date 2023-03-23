@@ -84,11 +84,25 @@ int Wall_GetTexi(Wall w) {
     return w->texi;
 }
 
+struct WSprite {
+    int x;
+    int y;
+    int w;
+    int h;
+    int hang;
+    int texi;
+};
+
 struct World {
     int wallc;
     Wall *wallv;
+
     int texc;
     WTexture *texv;
+
+    int sprc;
+    WSprite *sprv;
+
     int floortexi;
     int ceiltexi;
 };
@@ -123,11 +137,24 @@ World new_World(char const *filepath) {
         }
         // allocate textures array
         else if (token[0] == 'a' || token[0] == 'A') {
-            // consume 1 int (length)
-            this->texc = atoi(strtok(NULL, " "));
-            this->texv = (WTexture *)malloc(this->texc * sizeof(WTexture));
-            if (this->texv == NULL) {
-                return NULL;
+            // check type
+            char *alloctype = strtok(NULL, " ");
+            // allocate texture
+            if (alloctype[0] == 't' || alloctype[0] == 'T') {
+                // consume 1 int (length)
+                this->texc = atoi(strtok(NULL, " "));
+                this->texv = (WTexture *)malloc(this->texc * sizeof(WTexture));
+                if (this->texv == NULL) {
+                    return NULL;
+                }
+            }
+            else if (alloctype[0] == 's' || alloctype[0] == 'S') {
+                // consume 1 int (length)
+                this->texc = atoi(strtok(NULL, " "));
+                this->texv = (WTexture *)malloc(this->texc * sizeof(WTexture));
+                if (this->texv == NULL) {
+                    return NULL;
+                }
             }
         }
         // load texture
@@ -171,7 +198,7 @@ World new_World(char const *filepath) {
     fclose(f);
 
     this->wallc = wallIndex;
-    printf("%d walls loaded from %s\n", this->wallc, filepath);
+    printf("WARLOCK: %d walls loaded from %s\n", this->wallc, filepath);
     return this;
 }
 

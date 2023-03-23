@@ -2,6 +2,8 @@
 
 typedef struct WTexture *WTexture;
 typedef struct Wall *Wall;
+typedef struct WSprite *WSprite;
+
 typedef struct World *World;
 
 WTexture new_WTexture(Color *col, int w, int h);
@@ -16,6 +18,8 @@ int Wall_GetY1(Wall w);
 int Wall_GetX2(Wall w);
 int Wall_GetY2(Wall w);
 int Wall_GetTexi(Wall w);
+
+WSprite new_WSprite()
 
 World new_World(char const *filepath);
 void free_World(World w);

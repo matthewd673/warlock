@@ -1,16 +1,27 @@
-# allocate 1 texture
-A 3
+# allocate textures array
+A T 5
+
 # define all textures
 L res/stone.png
 L res/processor.png
 L res/grass.png
 L res/ceiltile.png
+L [TODO]
+
+# allocate sprites array
+A S 1
+
+# define all sprites
+S 32 32 4 0
 
 # stone box
 T 0
 E 100 150 100 400
 E 100 400 500 400
 E 100 150 500 100
+
+# barrel sprite inside box
+P 0 120 240
 
 # cpu wall
 T 1
