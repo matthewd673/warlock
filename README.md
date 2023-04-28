@@ -1,6 +1,11 @@
 # warlock
 
-Warlock is a raycasting *(not tracing)* engine built in C with raylib. Currently, it is most comparable to the Wolf3D renderer except with textured floors and ceilings.
+Warlock is a raycasting engine built in C with raylib. Currently, it is most comparable to the Wolf3D renderer except with textured floors and ceilings.
+
+**NOTE:** Contrary to popular belief, DOOM used an object-first renderer *not* a raycasting engine.
+This means that instead of casting rays to calculate wall heights like Wolf3D it iterated through a tree of walls and projected them to the screen
+using some clever trig functions. In other words, Warlock is currently failing in its goal to be a DOOM-like renderer.
+The `object-first` branch aims to (eventually) fix this.
 
 ## Build & Run
 
@@ -31,6 +36,8 @@ cc *.c `pkg-config --libs --cflags raylib` -o editor
 
 World files are very rudimentary, they consist of one-letter commands
 followed by arguments.
+
+**NOTE:** World files are gross. Someday, when golem is finished, they will be less gross.
 
 - **Load textures:**
   - **Allocate the correct number of texture slots:** `A [ct]`
